@@ -1,11 +1,16 @@
-from pony.orm import *
+from pony import orm
+from models.create_tables import *
 
-db = Database()
+db = orm.Database()
 
 ## Mysql
 db.bind(provider='', host='', user='', password='', database='loan-fast-api')
 ## python3 -m pip install PyMySQL
 ## if use mysql
+
+
+# Migration tablea
+user = migrate_table_users(db, orm)
 
 ## Postgres
 db.bind(provider='postgres', user='', password='', host='', database='')
