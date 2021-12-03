@@ -1,0 +1,13 @@
+from pony.orm import *
+
+db = Database()
+
+## Mysql
+db.bind(provider='', host='', user='', password='', database='loan-fast-api')
+## python3 -m pip install PyMySQL
+## if use mysql
+
+## Postgres
+db.bind(provider='postgres', user='', password='', host='', database='')
+
+db.generate_mapping(create_tables=True)
