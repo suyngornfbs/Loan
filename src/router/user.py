@@ -1,5 +1,7 @@
 from fastapi import APIRouter
-from pony.orm import db_session
+import uvicorn
+from starlette.requests import Request
+from pony.orm import db_session, commit, flush
 from ..models.model import Model
 from ..models.schemas import *
 from ..utils.hashPassword import Hash
@@ -26,8 +28,7 @@ def get_user_by_id(id: int):
 @router.post('/user', tags=['User'])
 def create_user(request: UserOut):
     with db_session:
-        _hash = Hash()
-        password = _hash.get_password_hash(request.password)
+        password = Hash.get_password_hash(request.password)
 
         user = Model.User(
             name=request.name,
@@ -38,13 +39,16 @@ def create_user(request: UserOut):
 
 
 @router.put('/user/{id}', tags=['User'])
-def update_user(id: int, request: UserOut):
+def update_user(id: int, body: UserOut, request: Request):
     with db_session:
-        Model.User[id].name = request.name
-        Model.User[id].email = request.email
-        Model.User[id].password = request.password
-        user = Model.User.select()
-    return [UserOut.from_orm(u) for u in user if u.id == id]
+        password = Hash.get_password_hash(body.password)
+        Model.User[id].name = body.name
+        Model.User[id].email = body.email
+        Model.User[id].password = password
+
+        user = Model.User[id]
+
+        return UserOut.from_orm(user)
 
 
 @router.delete('/user/{id}', tags=['User'])

@@ -13,19 +13,19 @@ class Model:
     class User(db.Entity):
         _table_ = 'users'
         id = PrimaryKey(int, auto=True)
-        name = Required(str, 255)
-        email = Required(str, 255, unique=True)
-        password = Required(str, 255)
+        name = Optional(str, 255)
+        email = Optional(str, 255, unique=True)
+        password = Optional(str, 255)
 
     class Role(db.Entity):
         _table_ = 'roles'
         id = PrimaryKey(int, auto=True)
-        name = Required(str, 255, unique=True)
+        name = Optional(str, 255, unique=True)
 
     class Permission(db.Entity):
         _table_ = 'permissions'
         id = PrimaryKey(int, auto=True)
-        name = Required(str, 255, unique=True)
+        name = Optional(str, 255, unique=True)
 
     class UserHasRole(db.Entity):
         _table_ = "user_has_role"
@@ -40,12 +40,12 @@ class Model:
     class Customer(db.Entity):
         _table_ = "customers"
         id = PrimaryKey(int, auto=True)
-        cus_code = Required(str, 255)
-        first_name = Required(str)
-        last_name = Required(str)
-        gender = Required(str, 10)
+        cus_code = Optional(str, 255)
+        first_name = Optional(str)
+        last_name = Optional(str)
+        gender = Optional(str, 10)
         dob = Optional(date)
-        phone = Required(str, 20)
+        phone = Optional(str, 20)
         nationality = Optional(str)
         email = Optional(str)
         identity_type = Optional(str)
@@ -55,11 +55,11 @@ class Model:
         house_no = Optional(str)
         street_no = Optional(str)
         address = Optional(str)
-        status = Required(str)
+        status = Optional(str)
         profile_img = Optional(str)
         attachment_file = Optional(str)
         occupation = Optional(str)
-        income = Optional(int)
+        income = Optional(float)
         created_by = Optional(int)
         updated_by = Optional(int)
         created_at = Optional(date)
@@ -70,24 +70,24 @@ class Model:
         _table_ = "disbursements"
         id = PrimaryKey(int, auto=True)
         dis_code = Optional(str)
-        cus_id = Required(int)
+        cus_id = Optional(int)
         gran_id = Optional(int)
         col_id = Optional(int)
         branch_id = Optional(int)
-        status = Required(str)
+        status = Optional(str)
         product_type = Optional(str)
-        repayment_method = Required(str)
-        interest_rate = Required(float)
+        repayment_method = Optional(str)
+        interest_rate = Optional(float)
         balance = Optional(float)
         term = Optional(int)
-        step = Required(int)
-        duration = Required(int)
+        step = Optional(int)
+        duration = Optional(int)
         interest_term = Optional(int)
-        propose_amount = Required(float)
+        propose_amount = Optional(float)
         approve_amount = Optional(float)
         principal = Optional(float)
-        fee_rate = Required(float)
-        dis_date = Required(date)
+        fee_rate = Optional(float)
+        dis_date = Optional(date)
         first_date = Optional(date)
         purpose = Optional(str)
         day_in_month = Optional(int)
@@ -103,8 +103,8 @@ class Model:
     class Schedule(db.Entity):
         _table_ = "schedules"
         id = PrimaryKey(int, auto=True)
-        cus_id = Required(int)
-        dis_id = Required(int)
+        cus_id = Optional(int)
+        dis_id = Optional(int)
         collection_date = Optional(date)
         collected_date = Optional(date)
         status = Optional(str)
@@ -133,7 +133,7 @@ class Model:
     class SchedulePaid(db.Entity):
         _table_ = "schedule_paid"
         id = PrimaryKey(int, auto=True)
-        sch_id = Required(int)
+        sch_id = Optional(int)
         invoice = Optional(str)
         paid_date = Optional(str)
         payment_date = Optional(date)
