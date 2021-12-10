@@ -3,3 +3,4 @@ uvicorn
 pony
 psycopg2-binary
 passlib
+python-jose

@@ -35,7 +35,7 @@ def create_user(request: UserOut):
             email=request.email,
             password=password,
         )
-    return [UserOut.from_orm(user)]
+    return UserOut.from_orm(user)
 
 
 @router.put('/user/{id}', tags=['User'])
