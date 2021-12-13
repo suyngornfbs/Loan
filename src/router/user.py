@@ -1,16 +1,17 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 import uvicorn
 from starlette.requests import Request
 from pony.orm import db_session, commit, flush
 from ..models.model import Model
 from ..models.schemas import *
 from ..utils.hashPassword import Hash
+from ..config.auth import get_current_user
 
 router = APIRouter()
 
 
 @router.get('/user', tags=['User'])
-async def get_all_user():
+async def get_all_user(get_current_user: UserOut = Depends(get_current_user)):
     with db_session:
         user = Model.User.select()
         result = [UserOut.from_orm(u) for u in user]

@@ -13,6 +13,10 @@ class UserOut(BaseModel):
         orm_mode = True
 
 
+# class UserInDB(UserOut):
+#     hashed_password: str
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str
