@@ -34,31 +34,31 @@ class Login(BaseModel):
         orm_mode = True
 
 
-class CustomerToDB:
-    cus_code: str
-    first_name: str
-    last_name: str
-    gender: str
-    dob: datetime.date
-    phone: str
-    nationality: str
-    email: str
-    identity_type: str
-    identity_number: str
-    identity_date: str
-    id_card: str
-    street_no: str
-    address: str
-    status: str
-    profile_img: str
-    attachment_file: str
-    occupation: str
-    income: float
-    created_by: int
-    updated_by: int
-    crated_at: datetime.date
-    updated_at: datetime.date
-    deleted_at: datetime.date
+class CustomerToDB(BaseModel):
+    cus_code: Optional[str]
+    first_name: Optional[str]
+    last_name: Optional[str]
+    gender: Optional[str]
+    dob: Optional[datetime.date]
+    phone: Optional[str]
+    nationality: Optional[str]
+    email: Optional[str]
+    identity_type: Optional[str]
+    identity_number: Optional[str]
+    identity_date: Optional[str]
+    id_card: Optional[str]
+    street_no: Optional[str]
+    address: Optional[str]
+    status: Optional[str]
+    profile_img: Optional[str]
+    attachment_file: Optional[str]
+    occupation: Optional[str]
+    income: Optional[float]
+    updated_by: Optional[int]
+    created_by: Optional[int]
+    crated_at: Optional[datetime.date]
+    updated_at: Optional[datetime.date]
+    deleted_at: Optional[datetime.date]
 
     class Config:
         orm_mode = True

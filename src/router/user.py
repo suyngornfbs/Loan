@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 @router.get('/user', tags=['User'])
-async def get_all_user(get_current_user: UserOut = Depends(get_current_user)):
+async def get_all_user(current_user: UserOut = Depends(get_current_user)):
     with db_session:
         user = Model.User.select()
         result = [UserOut.from_orm(u) for u in user]
@@ -19,7 +19,7 @@ async def get_all_user(get_current_user: UserOut = Depends(get_current_user)):
 
 
 @router.get('/user/{id}', tags=['User'])
-def get_user_by_id(id: int):
+def get_user_by_id(id: int,current_user: UserOut = Depends(get_current_user)):
     with db_session:
         user = Model.User.select()
         result = [UserOut.from_orm(u) for u in user if u.id == id]
@@ -40,7 +40,7 @@ def create_user(request: UserOut):
 
 
 @router.put('/user/{id}', tags=['User'])
-def update_user(id: int, body: UserOut, request: Request):
+def update_user(id: int, body: UserOut, current_user: UserOut = Depends(get_current_user)):
     with db_session:
         password = Hash.get_password_hash(body.password)
         Model.User[id].name = body.name
@@ -53,7 +53,7 @@ def update_user(id: int, body: UserOut, request: Request):
 
 
 @router.delete('/user/{id}', tags=['User'])
-def delete_user(id: int):
+def delete_user(id: int, current_user: UserOut = Depends(get_current_user)):
     with db_session:
         user = Model.User.select(lambda u: u.id == id)
         user.delete()
