@@ -35,6 +35,7 @@ class Login(BaseModel):
 
 
 class CustomerToDB(BaseModel):
+    id: Optional[int]
     cus_code: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
