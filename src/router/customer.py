@@ -4,17 +4,15 @@ from fastapi import APIRouter, Request, status
 from pony.orm import db_session
 from fastapi import Depends
 from ..config.auth import get_current_user
-from ..models.schemas import CustomerToDB, UserOut
+from ..models.schemasIn import CustomerIn, UserIn
+from ..models.schemasOut import CustomerOut
 from ..models.model import Model
-from fastapi.encoders import jsonable_encoder
-from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
 
 router = APIRouter()
 
 
 @router.post('/customer', tags=['Customers'])
-def create_customer(request: CustomerToDB, current_user: UserOut = Depends(get_current_user)):
+def create_customer(request: CustomerIn, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         try:
             customer = Model.Customer(
@@ -45,26 +43,35 @@ def create_customer(request: CustomerToDB, current_user: UserOut = Depends(get_c
         except RuntimeError:
             pass
 
-        return CustomerToDB.from_orm(customer)
+        return CustomerIn.from_orm(customer)
 
 
 @router.get('/customer', tags=['Customers'])
-def get_all_customer(current_user: UserOut = Depends(get_current_user)):
+def get_all_customer(current_user: UserIn = Depends(get_current_user)):
     with db_session:
         customer = Model.Customer.select()
-        return [CustomerToDB.from_orm(c) for c in customer]
+        return [CustomerOut.from_orm(c) for c in customer]
 
 
 @router.get('/customer/{id}', tags=['Customers'])
-def get_customer_by_id(id: int, current_user: UserOut = Depends(get_current_user)):
+def get_customer_by_id(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
-        return CustomerToDB.from_orm(Model.Customer[id])
+        customer = CustomerOut.from_orm(Model.Customer[id])
+        if not customer:
+            return {
+                'message': f'Customer Id:{id} not found'
+            }
+        return customer
 
 
 @router.put('/customer/{id}', tags=['Customers'])
-def update_customer(id: int, request: CustomerToDB, current_user: UserOut = Depends(get_current_user)):
+def update_customer(id: int, request: CustomerIn, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         customer = Model.Customer.get(lambda c: c.id == id)
+        if not customer:
+            return {
+                 'message': f'Customer Id:{id} not found'
+            }
         customer.first_name = request.first_name if request.first_name is not None else ""
         customer.last_name = request.last_name if request.last_name is not None else ""
         customer.gender = request.gender if request.gender is not None else ""
@@ -87,11 +94,11 @@ def update_customer(id: int, request: CustomerToDB, current_user: UserOut = Depe
         customer.created_by = request.created_by if request.created_by is not None else ""
         customer.created_at = request.crated_at if request.crated_at is not None else ""
         customer.updated_at = request.crated_at if request.crated_at is not None else ""
-        return CustomerToDB.from_orm(customer)
+        return CustomerOut.from_orm(customer)
 
 
 @router.delete('/customer/{id}', tags=['Customers'])
-def delete_customer(id: int, current_user: UserOut = Depends(get_current_user)):
+def delete_customer(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         customer = Model.Customer.select(lambda c: c.id == id)
         if customer:

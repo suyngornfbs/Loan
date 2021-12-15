@@ -6,7 +6,7 @@ from pydantic import BaseModel
 
 from ..config.token import ACCESS_TOKEN_EXPIRE_MINUTES, create_access_token
 from ..models.model import Model
-from ..models.schemas import Token
+from ..models.schemasIn import Token
 from pony.orm import db_session
 from ..utils.hashPassword import Hash
 
