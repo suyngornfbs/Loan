@@ -5,12 +5,20 @@ from pydantic import (BaseModel)
 
 
 class UserIn(BaseModel):
-    name: str
-    email: str
-    password: str
+    name: Optional[str]
+    email: Optional[str]
+    password: Optional[str]
 
     class Config:
         orm_mode = True
+
+
+# class UserUpdate(BaseModel):
+#     name: Optional[str]
+#     password: Optional[str]
+#
+#     class Config:
+#         orm_mode = True
 
 
 # class UserInDB(UserOut):
@@ -35,7 +43,6 @@ class Login(BaseModel):
 
 
 class CustomerIn(BaseModel):
-    cus_code: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
     gender: Optional[str]
@@ -56,7 +63,7 @@ class CustomerIn(BaseModel):
     income: Optional[float]
     updated_by: Optional[int]
     created_by: Optional[int]
-    crated_at: Optional[datetime.date]
+    created_at: Optional[datetime.date]
     updated_at: Optional[datetime.date]
     deleted_at: Optional[datetime.date]
 

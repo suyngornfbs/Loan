@@ -5,13 +5,14 @@ from pydantic import (BaseModel)
 
 
 class UserOut(BaseModel):
-    id: int
-    name: str
-    email: str
-    password: str
+    id: Optional[int]
+    name: Optional[str]
+    email: Optional[str]
+    password: Optional[str]
 
     class Config:
         orm_mode = True
+
 
 
 class CustomerOut(BaseModel):
@@ -37,7 +38,7 @@ class CustomerOut(BaseModel):
     income: Optional[float]
     updated_by: Optional[int]
     created_by: Optional[int]
-    crated_at: Optional[datetime.date]
+    created_at: Optional[datetime.date]
     updated_at: Optional[datetime.date]
     deleted_at: Optional[datetime.date]
 

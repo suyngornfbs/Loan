@@ -10,13 +10,13 @@ router = APIRouter()
 
 
 @router.get('/disbursement', tags=['Disbursement'])
-def all():
+def all(current_user: UserIn = Depends(get_current_user)):
     with db_session:
         disbursement = Model.Disbursement.select()
         return [DisbursementOut.from_orm(d) for d in disbursement]
 
 @router.get('/disbursement/{id}', tags=['Disbursement'])
-def get(id: int):
+def get(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         disbursement = Model.Disbursement.get(lambda d: d.id == id)
         if not disbursement:
@@ -25,12 +25,12 @@ def get(id: int):
 
 
 @router.post('/disbursement', tags=['Disbursement'])
-def create(request: DisbursementIn):
+def create(request: DisbursementIn, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         try:
             disbursement = Model.Disbursement(
                 dis_code="Loan_001",
-                cus_id=request.cus_id if request is not None else 0,
+                cus_id=request.cus_id if request.cus_id is not None else 0,
                 gran_id=request.gran_id if request.gran_id is not None else 0,
                 col_id=request.col_id if request.col_id is not None else 0,
                 branch_id=request.branch_id if request.branch_id is not None else 0,
@@ -66,7 +66,7 @@ def create(request: DisbursementIn):
 
 
 @router.put('/disbursement/{id}', tags=['Disbursement'])
-def update(id: int, request: DisbursementIn):
+def update(id: int, request: DisbursementIn, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         disbursement = Model.Disbursement.get(lambda d: d.id == id)
         if not disbursement:
@@ -105,7 +105,7 @@ def update(id: int, request: DisbursementIn):
 
 
 @router.delete('/disbursement/{id}', tags=['Disbursement'])
-def delete(id: int):
+def delete(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         disbursement = Model.Disbursement.select(lambda d: d.id == id)
         if disbursement:
