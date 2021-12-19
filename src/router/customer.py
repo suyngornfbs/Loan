@@ -18,6 +18,9 @@ router = APIRouter()
 def create_customer(request: CustomerIn, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         try:
+            check, validation = customerUtil.validation(request)
+            if not check:
+                return validation
             customer = Model.Customer(
                 cus_code=customerUtil.getCusCode(),
                 first_name=request.first_name if request.first_name is not None else "",
@@ -59,12 +62,12 @@ def get_all_customer(current_user: UserIn = Depends(get_current_user)):
 @router.get('/customer/{id}', tags=['Customers'])
 def get_customer_by_id(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
-        customer = CustomerOut.from_orm(Model.Customer[id])
+        customer = Model.Customer.get(lambda c: c.id == id)
         if not customer:
             return {
                 'message': f'Customer Id:{id} not found'
             }
-        return customer
+        return CustomerOut.from_orm(customer)
 
 
 @router.put('/customer/{id}', tags=['Customers'])
@@ -75,6 +78,11 @@ def update_customer(id: int, request: CustomerIn, current_user: UserIn = Depends
             return {
                  'message': f'Customer Id:{id} not found'
             }
+
+        check, validation = customerUtil.validation(request)
+        if not check:
+            return validation
+
         customer.first_name = request.first_name if request.first_name is not None else customer.first_name
         customer.last_name = request.last_name if request.last_name is not None else customer.last_name
         customer.gender = request.gender if request.gender is not None else customer.gender
