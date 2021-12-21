@@ -6,6 +6,7 @@ from ..models.schemasIn import UserIn, DisbursementIn
 from ..models.schemasOut import DisbursementOut
 from ..models.model import Model
 from ..utils.disbursementUtil import *
+from ..utils.ScheduleUtil import generateSchedule
 from datetime import date
 
 router = APIRouter()
@@ -16,6 +17,7 @@ def all(current_user: UserIn = Depends(get_current_user)):
     with db_session:
         disbursement = Model.Disbursement.select()
         return [DisbursementOut.from_orm(d) for d in disbursement]
+
 
 @router.get('/disbursement/{id}', tags=['Disbursement'])
 def get(id: int, current_user: UserIn = Depends(get_current_user)):
@@ -49,6 +51,8 @@ def create(request: DisbursementIn, current_user: UserIn = Depends(get_current_u
                 created_at=request.created_at if request.created_at is not None else date.today(),
                 updated_at=request.created_at if request.created_at is not None else date.today(),
             )
+            dis = Model.Disbursement.get(lambda d: d.dis_code == disbursement.dis_code)
+            generateSchedule(DisbursementOut.from_orm(dis))
             return DisbursementOut.from_orm(disbursement)
         except RuntimeError:
             return {'message': "Error"}

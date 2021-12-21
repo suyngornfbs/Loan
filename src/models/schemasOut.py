@@ -14,7 +14,6 @@ class UserOut(BaseModel):
         orm_mode = True
 
 
-
 class CustomerOut(BaseModel):
     id: Optional[int]
     cus_code: Optional[str]
@@ -77,7 +76,32 @@ class DisbursementOut(BaseModel):
     # updated_by: Optional[int]
     created_at: Optional[datetime.date]
     updated_at: Optional[datetime.date]
+
     # deleted_at: Optional[datetime.date]
+
+    class Config:
+        orm_mode = True
+
+
+class ScheduleOut(BaseModel):
+    id: Optional[int]
+    cus_id: Optional[int]
+    dis_id: Optional[int]
+    collection_date: Optional[datetime.date]
+    collected_date: Optional[datetime.date]
+    status: Optional[str]
+    balance: Optional[float]
+    sch_no: Optional[int]
+    principal: Optional[float]
+    principal_paid: Optional[float]
+    interest: Optional[float]
+    interest_pai: Optional[float]
+    fee: Optional[float]
+    fee_paid: Optional[float]
+    penalty: Optional[float]
+    penalty: Optional[float]
+    created_at: Optional[datetime.date]
+    updated_at: Optional[datetime.date]
 
     class Config:
         orm_mode = True
