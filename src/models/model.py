@@ -150,3 +150,4 @@ class Model:
         updated_at = Optional(date)
 
     db.generate_mapping(create_tables=True)
+

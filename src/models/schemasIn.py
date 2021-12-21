@@ -5,12 +5,20 @@ from pydantic import (BaseModel)
 
 
 class UserIn(BaseModel):
-    name: str
-    email: str
-    password: str
+    name: Optional[str]
+    email: Optional[str]
+    password: Optional[str]
 
     class Config:
         orm_mode = True
+
+
+# class UserUpdate(BaseModel):
+#     name: Optional[str]
+#     password: Optional[str]
+#
+#     class Config:
+#         orm_mode = True
 
 
 # class UserInDB(UserOut):
@@ -35,7 +43,6 @@ class Login(BaseModel):
 
 
 class CustomerIn(BaseModel):
-    cus_code: Optional[str]
     first_name: Optional[str]
     last_name: Optional[str]
     gender: Optional[str]
@@ -56,7 +63,7 @@ class CustomerIn(BaseModel):
     income: Optional[float]
     updated_by: Optional[int]
     created_by: Optional[int]
-    crated_at: Optional[datetime.date]
+    created_at: Optional[datetime.date]
     updated_at: Optional[datetime.date]
     deleted_at: Optional[datetime.date]
 
@@ -65,36 +72,60 @@ class CustomerIn(BaseModel):
 
 
 class DisbursementIn(BaseModel):
-    dis_code: Optional[str]
-    cus_id: Optional[int]
-    gran_id: Optional[int]
-    col_id: Optional[int]
-    branch_id: Optional[int]
-    status: Optional[str]
-    product_type: Optional[str]
-    repayment_method: Optional[str]
-    interest_rate: Optional[float]
-    balance: Optional[float]
-    term: Optional[int]
-    step: Optional[int]
-    duration: Optional[int]
-    interest_term: Optional[int]
-    propose_amount: Optional[float]
-    approve_amount: Optional[float]
-    principal: Optional[float]
-    fee_rate: Optional[float]
-    dis_date: Optional[datetime.date]
-    first_date: Optional[datetime.date]
-    purpose: Optional[str]
-    day_in_month: Optional[int]
-    day_in_year: Optional[int]
-    holiday_weekend: Optional[str]
-    contract_by: Optional[int]
-    created_by: Optional[int]
-    updated_by: Optional[int]
+    # dis_code: Optional[str]
+    cus_id: int
+    # gran_id: Optional[int]
+    # col_id: Optional[int]
+    # branch_id: Optional[int]
+    # status: Optional[str]
+    # product_type: Optional[str]
+    repayment_method: str
+    interest_rate: float
+    balance: float
+    # term: Optional[int]
+    step: int
+    duration: int
+    # interest_term: Optional[int]
+    # propose_amount: Optional[float]
+    # approve_amount: Optional[float]
+    # principal: float
+    fee_rate: float
+    dis_date: datetime.date
+    first_date: datetime.date
+    # purpose: Optional[str]
+    # day_in_month: Optional[int]
+    # day_in_year: Optional[int]
+    # holiday_weekend: Optional[str]
+    # contract_by: Optional[int]
+    # created_by: Optional[int]
+    # updated_by: Optional[int]
     created_at: Optional[datetime.date]
     updated_at: Optional[datetime.date]
-    deleted_at: Optional[datetime.date]
+
+    # deleted_at: Optional[datetime.date]
+
+    class Config:
+        orm_mode = True
+
+
+class ScheduleIn(BaseModel):
+    cus_id: int
+    dis_id: int
+    collection_date: datetime.date
+    collected_date: datetime.date
+    status: str
+    balance: float
+    sch_no: int
+    principal: float
+    principal_paid: Optional[float]
+    interest: float
+    interest_pai: Optional[float]
+    fee: float
+    fee_paid: float
+    penalty: Optional[float]
+    penalty: Optional[float]
+    created_at: Optional[datetime.date]
+    updated_at: Optional[datetime.date]
 
     class Config:
         orm_mode = True

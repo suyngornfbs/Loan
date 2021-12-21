@@ -5,10 +5,10 @@ from pydantic import (BaseModel)
 
 
 class UserOut(BaseModel):
-    id: int
-    name: str
-    email: str
-    password: str
+    id: Optional[int]
+    name: Optional[str]
+    email: Optional[str]
+    password: Optional[str]
 
     class Config:
         orm_mode = True
@@ -37,7 +37,7 @@ class CustomerOut(BaseModel):
     income: Optional[float]
     updated_by: Optional[int]
     created_by: Optional[int]
-    crated_at: Optional[datetime.date]
+    created_at: Optional[datetime.date]
     updated_at: Optional[datetime.date]
     deleted_at: Optional[datetime.date]
 
@@ -49,9 +49,9 @@ class DisbursementOut(BaseModel):
     id: Optional[int]
     dis_code: Optional[str]
     cus_id: Optional[int]
-    gran_id: Optional[int]
-    col_id: Optional[int]
-    branch_id: Optional[int]
+    # gran_id: Optional[int]
+    # col_id: Optional[int]
+    # branch_id: Optional[int]
     status: Optional[str]
     product_type: Optional[str]
     repayment_method: Optional[str]
@@ -60,23 +60,48 @@ class DisbursementOut(BaseModel):
     term: Optional[int]
     step: Optional[int]
     duration: Optional[int]
-    interest_term: Optional[int]
-    propose_amount: Optional[float]
-    approve_amount: Optional[float]
+    # interest_term: Optional[int]
+    # propose_amount: Optional[float]
+    # approve_amount: Optional[float]
     principal: Optional[float]
     fee_rate: Optional[float]
     dis_date: Optional[datetime.date]
     first_date: Optional[datetime.date]
-    purpose: Optional[str]
-    day_in_month: Optional[int]
-    day_in_year: Optional[int]
-    holiday_weekend: Optional[str]
-    contract_by: Optional[int]
-    created_by: Optional[int]
-    updated_by: Optional[int]
+    # purpose: Optional[str]
+    # day_in_month: Optional[int]
+    # day_in_year: Optional[int]
+    # holiday_weekend: Optional[str]
+    # contract_by: Optional[int]
+    # created_by: Optional[int]
+    # updated_by: Optional[int]
     created_at: Optional[datetime.date]
     updated_at: Optional[datetime.date]
-    deleted_at: Optional[datetime.date]
+
+    # deleted_at: Optional[datetime.date]
+
+    class Config:
+        orm_mode = True
+
+
+class ScheduleOut(BaseModel):
+    id: Optional[int]
+    cus_id: Optional[int]
+    dis_id: Optional[int]
+    collection_date: Optional[datetime.date]
+    collected_date: Optional[datetime.date]
+    status: Optional[str]
+    balance: Optional[float]
+    sch_no: Optional[int]
+    principal: Optional[float]
+    principal_paid: Optional[float]
+    interest: Optional[float]
+    interest_pai: Optional[float]
+    fee: Optional[float]
+    fee_paid: Optional[float]
+    penalty: Optional[float]
+    penalty: Optional[float]
+    created_at: Optional[datetime.date]
+    updated_at: Optional[datetime.date]
 
     class Config:
         orm_mode = True
