@@ -1,11 +1,15 @@
 class Setting:
 
+    def __init__(self):
+        pass
+
     @staticmethod
     def get_bind(self):
         return {
-            'provider': 'mysql',
+            'provider': 'postgres',
             'host': 'localhost',
-            "user": 'root',
-            "password": 'password',
-            "database": 'loan_fastapi'
+            'port': 5432,
+            'user': 'postgres',
+            'password': '069099',
+            'database': 'loan_db',
         }
