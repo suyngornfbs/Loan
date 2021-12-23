@@ -3,10 +3,13 @@ from passlib.context import CryptContext
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-class Hash():
+class Hash:
 
-    def verify_password(hashed_password, plain_password):
-        return pwd_context.verify(plain_password, hashed_password)
+    def __init__(self):
+        pass
 
-    def get_password_hash(password):
-        return pwd_context.hash(password)
+    def verify_password(self, plain_password):
+        return pwd_context.verify(plain_password, self)
+
+    def get_password_hash(self):
+        return pwd_context.hash(self)
