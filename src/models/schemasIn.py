@@ -129,3 +129,8 @@ class ScheduleIn(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+class PaidIn(BaseModel):
+    date: datetime.date
+    amount: float

@@ -3,7 +3,7 @@ from ..models.schemasIn import ScheduleIn
 from dateutil import relativedelta, parser
 from pony.orm import db_session
 from ..models.model import Model
-from datetime import datetime
+from datetime import date
 
 
 def generateSchedule(disbursement: DisbursementOut) -> bool:
@@ -43,7 +43,7 @@ def generateSchedule(disbursement: DisbursementOut) -> bool:
         schedules[key]['interest'] = interest
         schedules[key]['fee'] = fee
         schedules[key]['penalty'] = 0
-        schedules[key]['status'] = 'Not Yet Due'
+        schedules[key]['status'] = getStatus(schedules[key]['collection_date'])
         schedules[key]['sch_no'] = key
 
     return storeSchedule(schedules)
@@ -58,3 +58,11 @@ def storeSchedule(schedules):
 
 def getNextPay(old_pay):
     return old_pay + relativedelta.relativedelta(months=1)
+
+
+def getStatus(collection_date):
+    result = collection_date > date.today()
+    if result:
+        return 'Not Yet Due'
+    else:
+        return 'Past Due'
