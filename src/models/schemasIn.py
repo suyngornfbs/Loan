@@ -8,6 +8,9 @@ class UserIn(BaseModel):
     name: Optional[str]
     email: Optional[str]
     password: Optional[str]
+    dob: Optional[datetime.date]
+    gender: Optional[str]
+    con_password: Optional[str]
 
     class Config:
         orm_mode = True

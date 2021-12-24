@@ -1,5 +1,5 @@
-from fastapi import APIRouter, Depends
-
+from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi.staticfiles import StaticFiles
 from pony.orm import db_session, commit, flush
 from ..models.model import Model
 from ..models.schemasIn import UserIn
@@ -7,6 +7,7 @@ from ..models.schemasOut import UserOut
 from ..utils.hashPassword import Hash
 from ..utils import helper
 from ..config.auth import get_current_user, get_current_active_user
+
 
 router = APIRouter()
 
@@ -39,6 +40,10 @@ def register(request: UserIn):
             return {
                 'message': "email request '@gamil.com'"
             }
+        if not request.password == request.con_password:
+            return {
+                'message': "Invalid Password and Confirm Password"
+            }
         password = Hash.get_password_hash(request.password)
         email = Model.User.get(lambda u: u.email == request.email)
         if email is not None:
@@ -49,6 +54,8 @@ def register(request: UserIn):
             name=request.name,
             email=request.email,
             password=password,
+            dob=request.dob if request.dob is not None else '',
+            gender=request.gender if request.gender is not None else ''
         )
     return UserIn.from_orm(user)
 

@@ -9,6 +9,8 @@ class UserOut(BaseModel):
     name: Optional[str]
     email: Optional[str]
     password: Optional[str]
+    gender: Optional[str]
+    dob: Optional[datetime.date]
 
     class Config:
         orm_mode = True

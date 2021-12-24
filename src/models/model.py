@@ -16,6 +16,8 @@ class Model:
         name = Optional(str, 255)
         email = Optional(str, 255, unique=True)
         password = Optional(str, 255)
+        dob = Optional(date)
+        gender = Optional(str, 255)
 
     class Role(db.Entity):
         _table_ = 'roles'
