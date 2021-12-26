@@ -1,5 +1,6 @@
 from pony.orm import *
 from ..models.model import Model
+from datetime import date
 
 
 def getDisbursedCode():
@@ -48,3 +49,39 @@ def isCustomer(id) -> bool:
         if customer is None:
             return False
         return True
+
+
+def paynow(disbursement_id: int):
+    with db_session:
+        schedule = Model.Schedule.select(lambda s: s.dis_id == disbursement_id and s.status == "Not Yet Due").first()
+        schedule_dict = {
+            'principal': schedule.principal,
+            'interest': schedule.interest,
+            'fee': schedule.fee,
+            'penalty': schedule.penalty,
+            'total': totalPaynow(schedule),
+            'date': date.today()
+        }
+
+        return schedule_dict
+
+
+def totalPaynow(schedule: Model.Schedule):
+    total = schedule.fee + schedule.principal + schedule.interest + schedule.penalty
+    return total
+
+
+def totalPayment(schedule: Model.Schedule, amount) -> bool:
+    with db_session:
+        total = cFloat(schedule.principal) + cFloat(schedule.fee) + cFloat(schedule.interest) + \
+                cFloat(schedule.penalty) - cFloat(schedule.principal_paid) - cFloat(schedule.interest_paid) - \
+                cFloat(schedule.fee_paid) - cFloat(schedule.penalty_paid)
+        if total == amount:
+            return True
+        return False
+
+
+def cFloat(num):
+    if num is None:
+        return 0
+    return num

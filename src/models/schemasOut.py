@@ -107,3 +107,5 @@ class ScheduleOut(BaseModel):
 
     class Config:
         orm_mode = True
+
+
