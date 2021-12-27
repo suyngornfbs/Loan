@@ -21,15 +21,15 @@ def getDisbursedCode():
 def checkValidation(request):
     message = []
     check = True
-    if request.cus_id == 0:
+    if not request.cus_id or request.cus_id == 0:
         message.append('cus_id cannot 0')
         check = False
     elif not isCustomer(request.cus_id):
         message.append(f'Customer id:{request.cus_id}  not found')
         check = False
 
-    if request.repayment_method is None or request.repayment_method == "":
-        message.append('repayment_method is request!')
+    if not request.repayment_method or request.repayment_method != "Balloon":
+        message.append('repayment_method is request! or must be balloon')
         check = False
 
     if request.interest_rate is None:
@@ -38,6 +38,16 @@ def checkValidation(request):
 
     elif not isinstance(request.interest_rate, float):
         message.append('interest_rate request float')
+        check = False
+
+    if not request.dis_date:
+        message.append('Disbursement Date is request!')
+        check = False
+    elif not request.first_date:
+        message.append('First payment date is request!')
+        check = False
+    elif request.dis_date >= request.first_date:
+        message.append('First payment date must be bigger than disbursement date!')
         check = False
 
     return [check, {'message': message}]
@@ -71,17 +81,28 @@ def totalPaynow(schedule: Model.Schedule):
     return total
 
 
-def totalPayment(schedule: Model.Schedule, amount) -> bool:
+def totalPayment(schedule: Model.Schedule, amount) -> int:
     with db_session:
         total = cFloat(schedule.principal) + cFloat(schedule.fee) + cFloat(schedule.interest) + \
                 cFloat(schedule.penalty) - cFloat(schedule.principal_paid) - cFloat(schedule.interest_paid) - \
                 cFloat(schedule.fee_paid) - cFloat(schedule.penalty_paid)
         if total == amount:
-            return True
-        return False
+            return 1
+        elif total > amount:
+            return 2
+        else:
+            return 3
 
 
 def cFloat(num):
     if num is None:
         return 0
     return num
+
+
+def invoice():
+    with db_session:
+        count = max(s.id for s in Model.SchedulePaid)
+        if not count:
+            return 'paid_0000'
+        return 'paid_' + str(count)

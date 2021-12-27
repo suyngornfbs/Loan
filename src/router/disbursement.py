@@ -16,6 +16,10 @@ router = APIRouter()
 def all(current_user: UserIn = Depends(get_current_user)):
     with db_session:
         disbursement = Model.Disbursement.select()
+        if not disbursement:
+            return {
+                'message': 'Disbursement is empty!'
+            }
         return [DisbursementOut.from_orm(d) for d in disbursement]
 
 
@@ -39,7 +43,7 @@ def create(request: DisbursementIn, current_user: UserIn = Depends(get_current_u
             disbursement = Model.Disbursement(
                 dis_code=getDisbursedCode(),
                 cus_id=request.cus_id if request.cus_id is not None else 0,
-                status="New",
+                status="Approved",
                 repayment_method=request.repayment_method if request.repayment_method is not None else "",
                 interest_rate=request.interest_rate if request.interest_rate is not None else 0,
                 balance=request.balance if request.balance is not None else 0,
@@ -51,6 +55,7 @@ def create(request: DisbursementIn, current_user: UserIn = Depends(get_current_u
                 created_at=request.created_at if request.created_at is not None else date.today(),
                 updated_at=request.created_at if request.created_at is not None else date.today(),
             )
+            Model.Customer[request.cus_id].status = "Active"
             dis = Model.Disbursement.get(lambda d: d.dis_code == disbursement.dis_code)
             generateSchedule(DisbursementOut.from_orm(dis))
             return DisbursementOut.from_orm(disbursement)
@@ -79,7 +84,7 @@ def update(id: int, request: DisbursementIn, current_user: UserIn = Depends(get_
 
 
 @router.delete('/disbursement/{id}', tags=['Disbursement'])
-def delete(id: int, current_user: UserIn = Depends(get_current_user)):
+def delete(id: int):
     with db_session:
         disbursement = Model.Disbursement.select(lambda d: d.id == id)
         if disbursement:

@@ -6,8 +6,8 @@ from ..models.schemasIn import UserIn
 from ..models.schemasOut import UserOut
 from ..utils.hashPassword import Hash
 from ..utils import helper
+from datetime import date
 from ..config.auth import get_current_user, get_current_active_user
-
 
 router = APIRouter()
 
@@ -18,7 +18,7 @@ async def read_users_me(current_user: UserIn = Depends(get_current_active_user))
 
 
 @router.get('/user', tags=['User'])
-async def get_all_user():
+async def get_all_user(current_user: UserIn = Depends(get_current_active_user)):
     with db_session:
         user = Model.User.select()
         result = [UserIn.from_orm(u) for u in user]
@@ -28,9 +28,10 @@ async def get_all_user():
 @router.get('/user/{id}', tags=['User'])
 def get_user_by_id(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
-        user = Model.User.select()
-        result = [UserIn.from_orm(u) for u in user if u.id == id]
-    return result
+        user = Model.User.get(lambda u: u.id == id)
+        if not user:
+            return {'message': f'User id: {id} not found!'}
+    return UserIn.from_orm(user)
 
 
 @router.post('/register', tags=['Authenticate'])
@@ -50,14 +51,17 @@ def register(request: UserIn):
             return {
                 'message': "email is already token"
             }
-        user = Model.User(
-            name=request.name,
-            email=request.email,
-            password=password,
-            dob=request.dob if request.dob is not None else '',
-            gender=request.gender if request.gender is not None else ''
-        )
-    return UserIn.from_orm(user)
+        try:
+            user = Model.User(
+                name=request.name,
+                email=request.email,
+                password=password,
+                dob=request.dob if request.dob is not None else None,
+                gender=request.gender if request.gender is not None else ''
+            )
+        except ValueError:
+            pass
+    return {'message': 'Register successfully'}
 
 
 @router.post('/user/update', response_model=UserOut, tags=['User'])
@@ -90,6 +94,8 @@ def delete_user(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         if id != current_user.id:
             user = Model.User.select(lambda u: u.id == id)
+            if not user:
+                return {'message': f'User id: {id} not found!'}
             user.delete()
             return {
                 'message': 'Delete successfully'
