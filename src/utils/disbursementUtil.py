@@ -63,21 +63,48 @@ def isCustomer(id) -> bool:
 
 def paynow(disbursement_id: int):
     with db_session:
-        schedule = Model.Schedule.select(lambda s: s.dis_id == disbursement_id and s.status == "Not Yet Due").first()
+        close = Model.Disbursement.get(lambda d: d.id == disbursement_id)
+        if close.status == 'Closed':
+            return {
+                'disbursement': 'Closed'
+            }
+        schedule = Model.Schedule.select(lambda s: s.dis_id == disbursement_id and s.status in ('Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today', 'Partial Paid But Late'))
+        allPay = getAllTotalPay(schedule)
         schedule_dict = {
-            'principal': schedule.principal,
-            'interest': schedule.interest,
-            'fee': schedule.fee,
-            'penalty': schedule.penalty,
-            'total': totalPaynow(schedule),
+            'principal': allPay[0],
+            'interest': allPay[1],
+            'fee': allPay[2],
+            'penalty': 0,
+            'total': allPay[3],
             'date': date.today()
         }
 
         return schedule_dict
 
 
+def getAllTotalPay(schedules):
+    if schedules.first().status in ('Due Today', 'Not Yet Due', 'Partial Paid'):
+        schedule = schedules.first()
+        principal = schedule.principal - cFloat(schedule.principal_paid)
+        interest = schedule.interest - cFloat(schedule.interest_paid)
+        fee = schedule.fee - cFloat(schedule.fee_paid)
+        total = totalPaynow(schedule)
+        return [principal, interest, fee, total]
+
+    principal = interest = fee = total = 0
+    for schedule in schedules:
+        if schedule.status == "Not Yet Due":
+            break
+        principal += schedule.principal - cFloat(schedule.principal_paid)
+        interest += schedule.interest - cFloat(schedule.interest_paid)
+        fee += schedule.fee - cFloat(schedule.fee_paid)
+        total += totalPaynow(schedule)
+    return [principal, interest, fee, total]
+
+
 def totalPaynow(schedule: Model.Schedule):
-    total = schedule.fee + schedule.principal + schedule.interest + schedule.penalty
+    total = schedule.fee + schedule.principal + schedule.interest - \
+            cFloat(schedule.interest_paid) - cFloat(schedule.principal_paid) - cFloat(schedule.fee_paid)
     return total
 
 
@@ -98,11 +125,3 @@ def cFloat(num):
     if num is None:
         return 0
     return num
-
-
-def invoice():
-    with db_session:
-        count = max(s.id for s in Model.SchedulePaid)
-        if not count:
-            return 'paid_0000'
-        return 'paid_' + str(count)

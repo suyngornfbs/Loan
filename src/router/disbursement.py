@@ -63,7 +63,7 @@ def create(request: DisbursementIn, current_user: UserIn = Depends(get_current_u
             return {'message': "Error"}
 
 
-@router.put('/disbursement/{id}', tags=['Disbursement'])
+# @router.put('/disbursement/{id}', tags=['Disbursement'])
 def update(id: int, request: DisbursementIn, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         disbursement = Model.Disbursement.get(lambda d: d.id == id)
@@ -83,7 +83,7 @@ def update(id: int, request: DisbursementIn, current_user: UserIn = Depends(get_
         return DisbursementOut.from_orm(disbursement)
 
 
-@router.delete('/disbursement/{id}', tags=['Disbursement'])
+# @router.delete('/disbursement/{id}', tags=['Disbursement'])
 def delete(id: int):
     with db_session:
         disbursement = Model.Disbursement.select(lambda d: d.id == id)

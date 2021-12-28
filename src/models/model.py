@@ -137,7 +137,7 @@ class Model:
         id = PrimaryKey(int, auto=True)
         sch_id = Optional(int)
         invoice = Optional(str)
-        paid_date = Optional(str)
+        paid_date = Optional(date)
         payment_date = Optional(date)
         interest_paid = Optional(float)
         fee_paid = Optional(float)

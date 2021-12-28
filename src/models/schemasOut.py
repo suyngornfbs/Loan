@@ -97,7 +97,7 @@ class ScheduleOut(BaseModel):
     principal: Optional[float]
     principal_paid: Optional[float]
     interest: Optional[float]
-    interest_pai: Optional[float]
+    interest_paid: Optional[float]
     fee: Optional[float]
     fee_paid: Optional[float]
     penalty: Optional[float]

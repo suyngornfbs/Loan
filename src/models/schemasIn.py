@@ -122,7 +122,7 @@ class ScheduleIn(BaseModel):
     principal: float
     principal_paid: Optional[float]
     interest: float
-    interest_pai: Optional[float]
+    interest_paid: Optional[float]
     fee: float
     fee_paid: float
     penalty: Optional[float]

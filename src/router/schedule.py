@@ -4,8 +4,10 @@ from ..models.schemasOut import ScheduleOut, DisbursementOut, CustomerOut
 from ..models.model import Model
 from ..config.auth import get_current_user
 from pony.orm import db_session
+from datetime import date
 from ..utils.disbursementUtil import *
 from ..models.disbursementResource import PaymentOut, PayIn
+from ..utils.ScheduleUtil import *
 
 router = APIRouter()
 
@@ -46,31 +48,29 @@ def loan_form(id: int):
 @router.post('/disbursement/{id}/schedule/paynow', tags=['Schedule'])
 def pay_now(id: int, request: PayIn):
     with db_session:
-        schedules = Model.Schedule.select(lambda s: s.dis_id == id and s.status == 'Not Yet Due').first()
-        if not schedules:
+
+        is_schedule = Model.Schedule.select(lambda s: s.dis_id == id)
+        if not is_schedule:
             return {
                 'message': 'Disbursement is not found!'
             }
-        total = totalPayment(schedules, request.amount)
-        if total == 1:
-            schedules.status = 'Fully Paid On Time'
-            schedules.principal_paid = schedules.principal
-            schedules.interest_pai = schedules.interest
-            schedules.fee_paid = schedules.fee
-            schedules.penalty_paid = schedules.penalty
-            schedules.collected_date = date.today()
 
-            Model.SchedulePaid(
-                sch_id=schedules.id,
-                invoice=invoice(),
-                paid_date=date.today(),
-                payment_date=schedules.collection_date,
-                interest_paid=schedules.interest_pai,
-                penalty_paid=schedules.penalty_paid,
-                fee_paid=schedules.fee_paid,
-                status='Close',
-
-            )
+        # schedules = Model.Schedule.select(lambda s: s.dis_id == id and s.status in ('Past Due', 'Due Today', 'Partial Paid', 'Partial Paid But Late'))
+        # if schedules:
+        schedules = Model.Schedule.select(
+            lambda s: s.dis_id == id and s.status in ('Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today',
+                                                      'Partial Paid But Late')).first()
+        while request.amount > 0:
+            pay = getPayment(request.amount, schedules)
+            updatePay(schedules, pay)
+            request.amount = pay[3]
+            disbursed = Model.Disbursement.get(lambda d: d.id == schedules.dis_id)
+            if disbursed.status == 'Closed' and request.amount > 0:
+                return {
+                    'message': f'Payment successfully and You have {request.amount} $ left.'
+                }
+            sche_no = schedules.sch_no + 1
+            schedules = Model.Schedule.select(lambda s: s.dis_id == id and s.sch_no == sche_no).first()
 
         return {
             'message': 'Payment successfully'
