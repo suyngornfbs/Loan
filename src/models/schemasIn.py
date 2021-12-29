@@ -11,6 +11,20 @@ class UserIn(BaseModel):
     dob: Optional[datetime.date]
     gender: Optional[str]
     con_password: Optional[str]
+    profile_img: Optional[str]
+    expires_in: Optional[str]
+    address: Optional[str]
+    about_me: Optional[str]
+
+    class Config:
+        orm_mode = True
+
+
+class RegisterIn(BaseModel):
+    name: Optional[str]
+    email: str
+    password: Optional[str]
+    con_password: Optional[str]
 
     class Config:
         orm_mode = True

@@ -18,6 +18,10 @@ class Model:
         password = Optional(str, 255)
         dob = Optional(date)
         gender = Optional(str, 255)
+        expires_in = Optional(str, 255)
+        profile_img = Optional(str, 255)
+        about_me = Optional(str, 255)
+        address = Optional(str, 255)
 
     class Role(db.Entity):
         _table_ = 'roles'
@@ -152,4 +156,5 @@ class Model:
         updated_at = Optional(date)
 
     db.generate_mapping(create_tables=True)
+
 

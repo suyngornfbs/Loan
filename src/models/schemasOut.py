@@ -11,6 +11,10 @@ class UserOut(BaseModel):
     password: Optional[str]
     gender: Optional[str]
     dob: Optional[datetime.date]
+    expires_in: Optional[str]
+    profile_img: Optional[str]
+    about_me: Optional[str]
+    address: Optional[str]
 
     class Config:
         orm_mode = True
