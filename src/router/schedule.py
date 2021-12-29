@@ -17,8 +17,12 @@ def scheduleByLoan(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         schedules = Model.Schedule.select(lambda s: s.dis_id == id)
         if schedules:
-            return [ScheduleOut.from_orm(s) for s in schedules]
+            return {
+                'success': 1,
+                'data': [ScheduleOut.from_orm(s) for s in schedules]
+            }
         return {
+            'success': 0,
             'message': 'disbursement or schedule not defined!'
         }
 
@@ -29,6 +33,7 @@ def loan_form(id: int):
         disbursements_db = Model.Disbursement.get(lambda d: d.id == id)
         if not disbursements_db:
             return {
+                'success': 0,
                 'message': 'Disbursement is not found!'
             }
         customers_db = Model.Customer.get(lambda c: c.id == disbursements_db.cus_id)
@@ -42,6 +47,7 @@ def loan_form(id: int):
             'pay_off': payOff(disbursements_db.id)
         }
         return {
+            'success': 1,
             'data': data
         }
 
@@ -64,12 +70,14 @@ def pay_now(id: int, request: PayIn):
             disbursed = Model.Disbursement.get(lambda d: d.id == schedules.dis_id)
             if disbursed.status == 'Closed' and request.amount > 0:
                 return {
+                    'success': 1,
                     'message': f'Payment successfully and You have {request.amount} $ left.'
                 }
             sche_no = schedules.sch_no + 1
             schedules = Model.Schedule.select(lambda s: s.dis_id == id and s.sch_no == sche_no).first()
 
         return {
+            'success': 1,
             'message': 'Payment successfully'
         }
 
@@ -91,5 +99,6 @@ def payoff(id: int):
         schedules.collected_date = date.today()
         disbursement.status = "Paid Off"
         return {
+            'success': 1,
             'message': 'Paid off was successful'
         }

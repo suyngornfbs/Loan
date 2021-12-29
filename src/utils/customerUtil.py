@@ -27,6 +27,9 @@ def validation(request):
         message.append('last name is request!')
         check = False
 
-    return [check, {'message': message}]
+    return [check, {
+        'success': 0,
+        'message': message
+    }]
 
 

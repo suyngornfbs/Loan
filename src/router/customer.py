@@ -49,7 +49,10 @@ def create_customer(request: CustomerIn, current_user: UserIn = Depends(get_curr
         except RuntimeError:
             pass
 
-        return CustomerIn.from_orm(customer)
+        return {
+            'success': 1,
+            'data': CustomerIn.from_orm(customer)
+        }
 
 
 @router.get('/customer', tags=['Customers'])
@@ -58,9 +61,13 @@ def get_all_customer(current_user: UserIn = Depends(get_current_user)):
         customer = Model.Customer.select()
         if not customer:
             return {
+                'success': 0,
                 'message': 'Customer is empty!'
             }
-        return [CustomerOut.from_orm(c) for c in customer]
+        return {
+            'success': 1,
+            'data': [CustomerOut.from_orm(c) for c in customer]
+        }
 
 
 @router.get('/customer/{id}', tags=['Customers'])
@@ -69,6 +76,7 @@ def get_customer_by_id(id: int, current_user: UserIn = Depends(get_current_user)
         customer = Model.Customer.get(lambda c: c.id == id)
         if not customer:
             return {
+                'success': 0,
                 'message': f'Customer Id:{id} not found'
             }
         return CustomerOut.from_orm(customer)
@@ -80,7 +88,8 @@ def update_customer(id: int, request: CustomerIn, current_user: UserIn = Depends
         customer = Model.Customer.get(lambda c: c.id == id)
         if not customer:
             return {
-                 'message': f'Customer Id:{id} not found'
+                'success': 0,
+                'message': f'Customer Id:{id} not found'
             }
 
         # check, validation = customerUtil.validation(request)
@@ -109,7 +118,10 @@ def update_customer(id: int, request: CustomerIn, current_user: UserIn = Depends
             customer.updated_at = request.updated_at if request.updated_at is not None else date.today()
         except ValueError:
             pass
-        return CustomerOut.from_orm(customer)
+        return {
+            'success': 1,
+            'message': 'Update is successful'
+        }
 
 
 @router.delete('/customer/{id}', tags=['Customers'])
@@ -119,8 +131,10 @@ def delete_customer(id: int, current_user: UserIn = Depends(get_current_user)):
         if customer:
             customer.delete()
             return {
+                'success': 1,
                 'message': 'Delete successfully'
             }
         return {
+            'success': 0,
             'message': f'Customer Id:{id} not found'
         }

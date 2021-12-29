@@ -12,9 +12,12 @@ from ..config.auth import get_current_user, get_current_active_user
 router = APIRouter()
 
 
-@router.get("/users/me", response_model=UserOut, tags=['User'])
+@router.get("/users/me", tags=['User'])
 async def read_users_me(current_user: UserIn = Depends(get_current_active_user)):
-    return current_user
+    with db_session:
+        return {
+            'success': 1,
+            'data': UserOut.from_orm(current_user)}
 
 
 @router.get('/user', tags=['User'])
@@ -22,7 +25,10 @@ async def get_all_user(current_user: UserIn = Depends(get_current_active_user)):
     with db_session:
         user = Model.User.select()
         result = [UserOut.from_orm(u) for u in user]
-    return result
+    return {
+        'success': 1,
+        'data': result
+    }
 
 
 @router.get('/user/{id}', tags=['User'])
@@ -31,7 +37,10 @@ def get_user_by_id(id: int, current_user: UserIn = Depends(get_current_user)):
         user = Model.User.get(lambda u: u.id == id)
         if not user:
             return {'message': f'User id: {id} not found!'}
-    return UserIn.from_orm(user)
+    return {
+        'success': 1,
+        'data': UserIn.from_orm(user)
+    }
 
 
 @router.post('/register', tags=['Authenticate'])
@@ -39,16 +48,19 @@ def register(request: RegisterIn):
     with db_session:
         if not helper.isEmail(request.email):
             return {
+                'success': 0,
                 'message': "email request '@gmail.com'"
             }
         if not request.password == request.con_password:
             return {
+                'success': 0,
                 'message': "Invalid Password and Confirm Password"
             }
         password = Hash.get_password_hash(request.password)
         email = Model.User.get(lambda u: u.email == request.email)
         if email is not None:
             return {
+                'success': 0,
                 'message': "email is already token"
             }
         try:
@@ -59,7 +71,10 @@ def register(request: RegisterIn):
             )
         except ValueError:
             pass
-    return {'message': 'Register successfully'}
+    return {
+        'success': 1,
+        'message': 'Register successfully'
+    }
 
 
 @router.post('/user', tags=['User'])
@@ -168,12 +183,17 @@ def delete_user(id: int, current_user: UserIn = Depends(get_current_user)):
         if id != current_user.id:
             user = Model.User.select(lambda u: u.id == id)
             if not user:
-                return {'message': f'User id: {id} not found!'}
+                return {
+                    'success': 0,
+                    'message': f'User id: {id} not found!'
+                }
             user.delete()
             return {
+                'success': 1,
                 'message': 'Delete successfully'
             }
         else:
             return {
+                'success': 0,
                 'message': "Can not delete your current user"
             }

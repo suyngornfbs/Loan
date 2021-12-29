@@ -18,9 +18,13 @@ def all(current_user: UserIn = Depends(get_current_user)):
         disbursement = Model.Disbursement.select()
         if not disbursement:
             return {
+                'success': 0,
                 'message': 'Disbursement is empty!'
             }
-        return [DisbursementOut.from_orm(d) for d in disbursement]
+        return {
+            'success': 1,
+            'data': [DisbursementOut.from_orm(d) for d in disbursement]
+        }
 
 
 @router.get('/disbursement/{id}', tags=['Disbursement'])
@@ -28,8 +32,13 @@ def get(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         disbursement = Model.Disbursement.get(lambda d: d.id == id)
         if not disbursement:
-            return {'message': f'Disbursement Id:{id} not found'}
-        return DisbursementOut.from_orm(disbursement)
+            return {
+                'success': 0,
+                'message': f'Disbursement Id:{id} not found'}
+        return {
+            'success': 1,
+            'data': DisbursementOut.from_orm(disbursement)
+        }
 
 
 @router.post('/disbursement', tags=['Disbursement'])
@@ -58,9 +67,15 @@ def create(request: DisbursementIn, current_user: UserIn = Depends(get_current_u
             Model.Customer[request.cus_id].status = "Active"
             dis = Model.Disbursement.get(lambda d: d.dis_code == disbursement.dis_code)
             generateSchedule(DisbursementOut.from_orm(dis))
-            return DisbursementOut.from_orm(disbursement)
+            return {
+                'success': 1,
+                'data': DisbursementOut.from_orm(disbursement)
+            }
         except RuntimeError:
-            return {'message': "Error"}
+            return {
+                'success': 0,
+                'message': "Error"
+            }
 
 
 # @router.put('/disbursement/{id}', tags=['Disbursement'])
@@ -68,7 +83,10 @@ def update(id: int, request: DisbursementIn, current_user: UserIn = Depends(get_
     with db_session:
         disbursement = Model.Disbursement.get(lambda d: d.id == id)
         if not disbursement:
-            return {'message': f'Disbursement Id:{id} not found'}
+            return {
+                'success': 0,
+                'message': f'Disbursement Id:{id} not found'
+            }
         disbursement.cus_id = request.cus_id if request is not None else 0
         disbursement.repayment_method = request.repayment_method if request.repayment_method is not None else ""
         disbursement.interest_rate = request.interest_rate if request.interest_rate is not None else 0
@@ -80,7 +98,10 @@ def update(id: int, request: DisbursementIn, current_user: UserIn = Depends(get_
         disbursement.first_date = request.first_date if request.first_date is not None else ""
         disbursement.updated_at = request.updated_at if request.updated_at is not None else date.today()
 
-        return DisbursementOut.from_orm(disbursement)
+        return {
+            'success': 1,
+            'data': DisbursementOut.from_orm(disbursement)
+        }
 
 
 # @router.delete('/disbursement/{id}', tags=['Disbursement'])
@@ -90,6 +111,9 @@ def delete(id: int):
         if disbursement:
             disbursement.delete()
             return {
+                'success': 1,
                 'message': 'Delete successfully'
             }
-        return {'message': f'Disbursement Id:{id} not found'}
+        return {
+            'success': 0,
+            'message': f'Disbursement Id:{id} not found'}

@@ -50,7 +50,10 @@ def checkValidation(request):
         message.append('First payment date must be bigger than disbursement date!')
         check = False
 
-    return [check, {'message': message}]
+    return [check, {
+        'success': 0,
+        'message': message
+    }]
 
 
 def isCustomer(id) -> bool:
@@ -150,6 +153,7 @@ def payOff(id: int):
                                                       'Partial Paid But Late')).first()
         if not schedules:
             return {
+                'success': 0,
                 'message': "something went wrong!"
             }
         collection_date = schedules.collection_date
@@ -221,6 +225,7 @@ def checkDisbursedAndSchedule(id: int):
         is_schedule = Model.Schedule.select(lambda s: s.dis_id == id)
         if not is_schedule:
             return {
+                'success': 0,
                 'message': 'Schedule is not found!'
             }
         return 'ok'
