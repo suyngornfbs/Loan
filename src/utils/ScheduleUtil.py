@@ -150,6 +150,7 @@ def updatePay(schedules: Model.Schedule, pay):
             if isTheFinalPaid(schedules.dis_id, schedules.sch_no) and pay[4] in ('Fully Paid On Time', 'Fully Paid But Late'):
                 Model.Disbursement[schedules.dis_id].status = "Closed"
             Model.SchedulePaid(
+                dis_id=schedules.dis_id,
                 sch_id=schedules.id,
                 invoice=invoice(),
                 paid_date=date.today(),
@@ -166,8 +167,9 @@ def updatePay(schedules: Model.Schedule, pay):
 
 def invoice():
     with db_session:
-        # count = max(s.id for s in Model.SchedulePaid)
-        count = False
+        schedule = Model.Schedule.select()
+        count = max(s.id for s in schedule)
+        # count = False
         if not count:
             return 'paid_0000'
         return 'paid_' + str(count)

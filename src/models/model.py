@@ -141,6 +141,7 @@ class Model:
     class SchedulePaid(db.Entity):
         _table_ = "schedule_paid"
         id = PrimaryKey(int, auto=True)
+        dis_id = Optional(int)
         sch_id = Optional(int)
         invoice = Optional(str)
         paid_date = Optional(date)

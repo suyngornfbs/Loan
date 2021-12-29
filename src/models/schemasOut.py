@@ -113,3 +113,22 @@ class ScheduleOut(BaseModel):
         orm_mode = True
 
 
+class SchedulePaidOut(BaseModel):
+    id: Optional[int]
+    dis_id: Optional[int]
+    sch_id: Optional[int]
+    invoice: Optional[str]
+    paid_date: Optional[datetime.date]
+    payment_date: Optional[datetime.date]
+    interest_paid: Optional[float]
+    fee_paid: Optional[float]
+    principal_paid: Optional[float]
+    penalty_paid: Optional[float]
+    paid_total: Optional[float]
+    paid_off_note: Optional[str]
+    status: Optional[str]
+    created_at: Optional[datetime.date]
+    updated_at: Optional[datetime.date]
+
+    class Config:
+        orm_mode = True

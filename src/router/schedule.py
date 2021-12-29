@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from ..models.schemasIn import UserIn
-from ..models.schemasOut import ScheduleOut, DisbursementOut, CustomerOut
+from ..models.schemasOut import ScheduleOut, DisbursementOut, CustomerOut, SchedulePaidOut
 from ..models.model import Model
 from ..config.auth import get_current_user
 from pony.orm import db_session
@@ -97,8 +97,41 @@ def payoff(id: int):
         schedules.fee = schedules.fee_paid = pay_off.get('fee')
         schedules.principal = schedules.principal_paid = pay_off.get('principal')
         schedules.collected_date = date.today()
+        schedules.status = "Paid Off"
         disbursement.status = "Paid Off"
+
+        Model.SchedulePaid(
+            dis_id=id,
+            sch_id=schedules.id,
+            invoice=invoice(),
+            paid_date=date.today(),
+            payment_date=schedules.collection_date,
+            interest_paid=schedules.interest_paid,
+            penalty_paid=schedules.penalty_paid,
+            fee_paid=schedules.fee_paid,
+            status='Close',
+        )
+
+        rm_sche = Model.Schedule.select(lambda s: s.sch_no > schedules.sch_no and s.dis_id == id)
+        for rm in rm_sche:
+            rm.delete()
+
         return {
             'success': 1,
             'message': 'Paid off was successful'
+        }
+
+
+@router.post('/disbursement/{id}/schedule-paid', tags=['Schedule'])
+def schedule_paid(id: int):
+    with db_session:
+        schedule_paid = Model.SchedulePaid.select(lambda s: s.dis_id == id)
+        if not schedule_paid:
+            return {
+                'success': 0,
+                'message': 'Disbursement or Schedule not found!'
+            }
+        return {
+            'success': 1,
+            'data': [SchedulePaidOut(s) for s in schedule_paid]
         }

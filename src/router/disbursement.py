@@ -64,8 +64,8 @@ def create(request: DisbursementIn, current_user: UserIn = Depends(get_current_u
                 product_type=request.product_type if request.product_type else "",
                 created_at=request.created_at if request.created_at is not None else date.today(),
                 updated_at=request.created_at if request.created_at is not None else date.today(),
-                interest_period = request.interest_period if request.interest_period else "",
-                duration_period = request.duration_period if request.duration_period else ""
+                interest_period=request.interest_period if request.interest_period else "",
+                duration_period=request.duration_period if request.duration_period else ""
             )
             Model.Customer[request.cus_id].status = "Active"
             dis = Model.Disbursement.get(lambda d: d.dis_code == disbursement.dis_code)
