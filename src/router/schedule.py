@@ -49,13 +49,9 @@ def loan_form(id: int):
 @router.post('/disbursement/{id}/schedule/paynow', tags=['Schedule'])
 def pay_now(id: int, request: PayIn):
     with db_session:
-
-        is_schedule = Model.Schedule.select(lambda s: s.dis_id == id)
-        if not is_schedule:
-            return {
-                'message': 'Disbursement is not found!'
-            }
-
+        validation = checkDisbursedAndSchedule(id)
+        if validation != "ok":
+            return validation
         # schedules = Model.Schedule.select(lambda s: s.dis_id == id and s.status in ('Past Due', 'Due Today', 'Partial Paid', 'Partial Paid But Late'))
         # if schedules:
         schedules = Model.Schedule.select(
@@ -75,4 +71,25 @@ def pay_now(id: int, request: PayIn):
 
         return {
             'message': 'Payment successfully'
+        }
+
+
+@router.post('/disbursement/{id}/schedule/payoff', tags=['Schedule'])
+def payoff(id: int):
+    with db_session:
+        validation = checkDisbursedAndSchedule(id)
+        if validation != "ok":
+            return validation
+        disbursement = Model.Disbursement.get(lambda d: d.id == id)
+        pay_off = payOff1(disbursement.id)
+        schedules = Model.Schedule.select(
+            lambda s: s.dis_id == id and s.status in ('Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today',
+                                                      'Partial Paid But Late')).first()
+        schedules.interest = schedules.interest_paid = pay_off.get('interest')
+        schedules.fee = schedules.fee_paid = pay_off.get('fee')
+        schedules.principal = schedules.principal_paid = pay_off.get('principal')
+        schedules.collected_date = date.today()
+        disbursement.status = "Paid Off"
+        return {
+            'message': 'Paid off was successful'
         }
