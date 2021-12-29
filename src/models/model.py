@@ -82,11 +82,13 @@ class Model:
         branch_id = Optional(int)
         status = Optional(str)
         product_type = Optional(str)
+        currency = Optional(str)
         repayment_method = Optional(str)
         interest_rate = Optional(float)
         balance = Optional(float)
-        term = Optional(int)
-        step = Optional(int)
+        duration_period = Optional(str)
+        interest_period = Optional(str)
+        frequency = Optional(int)
         duration = Optional(int)
         interest_term = Optional(int)
         propose_amount = Optional(float)
@@ -156,5 +158,3 @@ class Model:
         updated_at = Optional(date)
 
     db.generate_mapping(create_tables=True)
-
-

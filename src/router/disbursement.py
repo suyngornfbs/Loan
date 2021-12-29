@@ -56,13 +56,16 @@ def create(request: DisbursementIn, current_user: UserIn = Depends(get_current_u
                 repayment_method=request.repayment_method if request.repayment_method is not None else "",
                 interest_rate=request.interest_rate if request.interest_rate is not None else 0,
                 balance=request.balance if request.balance is not None else 0,
-                step=request.step if request.step is not None else 0,
+                frequency=request.frequency if request.frequency is not None else 0,
                 duration=request.duration if request.duration is not None else 0,
                 fee_rate=request.fee_rate if request.fee_rate is not None else 0,
                 dis_date=request.dis_date if request.dis_date is not None else "",
                 first_date=request.first_date if request.first_date is not None else "",
+                product_type=request.product_type if request.product_type else "",
                 created_at=request.created_at if request.created_at is not None else date.today(),
                 updated_at=request.created_at if request.created_at is not None else date.today(),
+                interest_period = request.interest_period if request.interest_period else "",
+                duration_period = request.duration_period if request.duration_period else ""
             )
             Model.Customer[request.cus_id].status = "Active"
             dis = Model.Disbursement.get(lambda d: d.dis_code == disbursement.dis_code)
@@ -91,12 +94,14 @@ def update(id: int, request: DisbursementIn, current_user: UserIn = Depends(get_
         disbursement.repayment_method = request.repayment_method if request.repayment_method is not None else ""
         disbursement.interest_rate = request.interest_rate if request.interest_rate is not None else 0
         disbursement.balance = request.balance if request.balance is not None else 0
-        disbursement.step = request.step if request.step is not None else 0
+        disbursement.frequency = request.frequency if request.frequency is not None else 0
         disbursement.duration = request.duration if request.duration is not None else 0
         disbursement.fee_rate = request.fee_rate if request.fee_rate is not None else 0
         disbursement.dis_date = request.dis_date if request.dis_date is not None else ""
         disbursement.first_date = request.first_date if request.first_date is not None else ""
         disbursement.updated_at = request.updated_at if request.updated_at is not None else date.today()
+        disbursement.interest_period = request.interest_period if request.interest_period else ""
+        disbursement.duration_period = request.duration_period if request.duration_period else ""
 
         return {
             'success': 1,

@@ -95,12 +95,14 @@ class DisbursementIn(BaseModel):
     # col_id: Optional[int]
     # branch_id: Optional[int]
     # status: Optional[str]
-    # product_type: Optional[str]
+    product_type: Optional[str]
     repayment_method: str
     interest_rate: float
     balance: float
-    # term: Optional[int]
-    step: int
+    duration_period: Optional[str]
+    interest_period: Optional[str]
+    currency: Optional[str]
+    frequency: int
     duration: int
     # interest_term: Optional[int]
     # propose_amount: Optional[float]
