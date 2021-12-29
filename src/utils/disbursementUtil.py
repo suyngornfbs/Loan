@@ -1,6 +1,6 @@
 from pony.orm import *
 from ..models.model import Model
-from datetime import date
+from datetime import date, datetime
 
 
 def getDisbursedCode():
@@ -68,7 +68,12 @@ def paynow(disbursement_id: int):
             return {
                 'disbursement': 'Closed'
             }
-        schedule = Model.Schedule.select(lambda s: s.dis_id == disbursement_id and s.status in ('Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today', 'Partial Paid But Late'))
+        elif close.status == "Paid Off":
+            return {
+                'disbursement': 'Paid Off'
+            }
+        schedule = Model.Schedule.select(lambda s: s.dis_id == disbursement_id and s.status in (
+            'Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today', 'Partial Paid But Late'))
         allPay = getAllTotalPay(schedule)
         schedule_dict = {
             'principal': allPay[0],
@@ -125,3 +130,97 @@ def cFloat(num):
     if num is None:
         return 0
     return num
+
+
+def payOff(id: int):
+    with db_session:
+        disbursement = Model.Disbursement.get(lambda d: d.id == id)
+
+        if disbursement.status == "Closed":
+            return {
+                'disbursement': 'Closed'
+            }
+        elif disbursement.status == 'Paid Off':
+            return {
+                'disbursement': 'Paid Off'
+            }
+
+        schedules = Model.Schedule.select(
+            lambda s: s.dis_id == id and s.status in ('Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today',
+                                                      'Partial Paid But Late')).first()
+        if not schedules:
+            return {
+                'message': "something went wrong!"
+            }
+        collection_date = schedules.collection_date
+        date_count = date.today() - collection_date
+        if date_count.days > 0:
+            interest = disbursement.balance * disbursement.interest_rate * date_count.days / (
+                    30 * 100) - schedules.interest_paid
+            fee = disbursement.balance * disbursement.fee_rate * date_count.days / (30 * 100) - schedules.fee_paid
+            principal = disbursement.balance - schedules.principal_paid
+        else:
+            interest = schedules.interest - cFloat(schedules.interest_paid)
+            fee = schedules.fee - cFloat(schedules.fee_paid)
+            principal = disbursement.balance - cFloat(schedules.principal_paid)
+        total = principal + interest + fee
+        return {
+            'principal': principal if principal > 0 else 0,
+            'interest': interest if interest > 0 else 0,
+            'fee': fee if fee > 0 else 0,
+            'penalty': 0,
+            'total': total if total > 0 else 0,
+            'date': date.today()
+        }
+
+
+def payOff1(id: int):
+    with db_session:
+        disbursement = Model.Disbursement.get(lambda d: d.id == id)
+        schedules = Model.Schedule.select(
+            lambda s: s.dis_id == id and s.status in ('Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today',
+                                                      'Partial Paid But Late')).first()
+        collection_date = schedules.collection_date
+        date_count = date.today() - collection_date
+        if date_count.days > 0:
+            interest = disbursement.balance * disbursement.interest_rate * date_count.days / (
+                    30 * 100)
+            fee = disbursement.balance * disbursement.fee_rate * date_count.days / (30 * 100)
+            principal = disbursement.balance
+        else:
+            interest = schedules.interest
+            fee = schedules.fee
+            principal = disbursement.balance
+        total = principal + interest + fee
+        return {
+            'principal': principal if principal > 0 else 0,
+            'interest': interest if interest > 0 else 0,
+            'fee': fee if fee > 0 else 0,
+            'penalty': 0,
+            'total': total if total > 0 else 0,
+            'date': date.today()
+        }
+
+
+def checkDisbursedAndSchedule(id: int):
+    with db_session:
+        is_disbursement = Model.Disbursement.get(lambda d: d.id == id)
+        if not is_disbursement:
+            return {
+                'message': 'Disbursement is not found!'
+            }
+        elif is_disbursement.status == 'Closed':
+            return {
+                'message': 'Disbursement was close!'
+            }
+        elif is_disbursement.status == "Paid Off":
+            return {
+                'message': 'Disbursement was pay off!'
+            }
+
+        is_schedule = Model.Schedule.select(lambda s: s.dis_id == id)
+        if not is_schedule:
+            return {
+                'message': 'Schedule is not found!'
+            }
+        return 'ok'
