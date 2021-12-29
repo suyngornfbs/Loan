@@ -9,8 +9,7 @@ app = fastapi.FastAPI(debug=True)
 db = Model()
 
 origins = [
-    "http://localhost",
-    "http://localhost:8080"
+    "*"
 ]
 
 app.add_middleware(
@@ -29,5 +28,5 @@ app.include_router(schedule.router)
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="localhost", port=8002, reload=True)
+    uvicorn.run("main:app", host="localhost", port=8000, reload=True)
 
