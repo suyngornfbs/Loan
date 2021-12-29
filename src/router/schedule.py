@@ -38,7 +38,8 @@ def loan_form(id: int):
             'disbursement': DisbursementOut.from_orm(disbursements_db),
             'customer': CustomerOut.from_orm(customers_db),
             'schedules': [ScheduleOut.from_orm(s) for s in schedules_db],
-            'pay_now': paynow(disbursements_db.id)
+            'pay_now': paynow(disbursements_db.id),
+            'pay_off': payOff(disbursements_db.id)
         }
         return {
             'data': data

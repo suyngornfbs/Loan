@@ -6,10 +6,9 @@ class Setting:
     @staticmethod
     def get_bind(self):
         return {
-            'provider': 'postgres',
+            'provider': 'mysql',
             'host': 'localhost',
-            'port': 5432,
-            'user': 'postgres',
-            'password': '069099',
-            'database': 'loan_db',
+            "user": 'root',
+            "password": 'password',
+            "database": 'loan_fastapi'
         }

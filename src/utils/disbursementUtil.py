@@ -68,7 +68,8 @@ def paynow(disbursement_id: int):
             return {
                 'disbursement': 'Closed'
             }
-        schedule = Model.Schedule.select(lambda s: s.dis_id == disbursement_id and s.status in ('Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today', 'Partial Paid But Late'))
+        schedule = Model.Schedule.select(lambda s: s.dis_id == disbursement_id and s.status in (
+            'Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today', 'Partial Paid But Late'))
         allPay = getAllTotalPay(schedule)
         schedule_dict = {
             'principal': allPay[0],
@@ -125,3 +126,18 @@ def cFloat(num):
     if num is None:
         return 0
     return num
+
+
+def payOff(id: int):
+    with db_session:
+        schedules = Model.Schedule.select(
+            lambda s: s.dis_id == id and s.status in ('Not Yet Due', 'Partial Paid', 'Past Due', 'Due Today',
+                                                      'Partial Paid But Late')).first()
+        if not schedules:
+            return {
+                'message': "something went wrong!"
+            }
+        collection_date = schedules.collection_date
+        date_count = date.today() - collection_date
+        if date_count > 0:
+            return date_count
