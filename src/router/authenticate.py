@@ -1,6 +1,6 @@
 from datetime import timedelta
 
-from fastapi import APIRouter, status, Depends, HTTPException
+from fastapi import APIRouter, status, Depends, HTTPException, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel
 
@@ -9,6 +9,8 @@ from ..models.model import Model
 from ..models.schemasIn import Token
 from pony.orm import db_session
 from ..utils.hashPassword import Hash
+from ..config.auth import get_current_user, get_current_active_user
+from ..models.schemasIn import UserIn
 
 router = APIRouter()
 
@@ -24,3 +26,12 @@ def login(request: OAuth2PasswordRequestForm = Depends()):
 
     access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
+
+
+@router.get("/logout")
+async def logout(response: Response, current_user: UserIn = Depends(get_current_active_user)):
+    # Also tried following two comment lines
+    # response.set_cookie(key="access_token", value="", max_age=1)
+    # response.delete_cookie("access_token", domain="localhost")
+    response.delete_cookie("access_token")
+    return response

@@ -3,7 +3,8 @@ from ..models.schemasIn import ScheduleIn
 from dateutil import relativedelta, parser
 from pony.orm import db_session
 from ..models.model import Model
-from datetime import date
+from datetime import date, datetime
+import calendar
 
 
 def generateSchedule(disbursement: DisbursementOut) -> bool:
@@ -35,7 +36,7 @@ def generateSchedule(disbursement: DisbursementOut) -> bool:
 
         if key > 1:
             schedules[key] = {}
-            schedules[key]['collection_date'] = getNextPay(schedules[key - 1]['collection_date'])
+            schedules[key]['collection_date'] = getNextPay(schedules[key - 1]['collection_date'], disbursement.first_date)
         schedules[key]['dis_id'] = disbursement.id
         schedules[key]['cus_id'] = disbursement.cus_id
         schedules[key]['balance'] = disbursement.balance if key != disbursement.duration else 0
@@ -65,8 +66,24 @@ def storeSchedule(schedules):
     return True
 
 
-def getNextPay(old_pay):
-    return old_pay + relativedelta.relativedelta(months=1)
+def getNextPay(old_pay, first_pay):
+    dt = old_pay + relativedelta.relativedelta(months=1)
+    day = first_pay.day
+    while True:
+        try:
+            newdate = dt.replace(day=day)
+            break
+        except (ValueError, TypeError):
+            day -= 1
+    return newdate
+
+
+def add_months(sourcedate, months):
+    month = sourcedate.month - 1 + months
+    year = sourcedate.year + month // 12
+    month = month % 12 + 1
+    day = min(sourcedate.day, calendar.monthrange(year, month)[1])
+    return date(year, month, day)
 
 
 def isTheFinalPaid(id: int, sch_no: int):
@@ -133,7 +150,7 @@ def updatePay(schedules: Model.Schedule, pay):
             schedules.penalty_paid = 0
             schedules.collected_date = date.today()
             if isTheFinalPaid(schedules.dis_id, schedules.sch_no) and pay[4] in (
-            'Fully Paid On Time', 'Fully Paid But Late'):
+                    'Fully Paid On Time', 'Fully Paid But Late'):
                 Model.Disbursement[schedules.dis_id].status = "Closed"
             Model.SchedulePaid(
                 dis_id=schedules.dis_id,
