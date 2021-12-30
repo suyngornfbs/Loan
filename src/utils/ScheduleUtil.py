@@ -79,9 +79,11 @@ def isTheFinalPaid(id: int, sch_no: int):
 
 
 def getPayment(amount, schedule: Model.Schedule):
+    global interest_paid, fee_paid
     if amount == 0:
         return [0, 0, 0, 0, 'Amount 0']
     final = []
+    paid = []
     status = schedule.status
     if status in ('Past Due', 'Partial Paid But Late'):
         p_status = 'Partial Paid But Late'
@@ -91,51 +93,34 @@ def getPayment(amount, schedule: Model.Schedule):
         f_status = 'Fully Paid On Time'
     if amount >= (schedule.interest - cFloat(schedule.interest_paid)):
         final.append(schedule.interest)
-        amount = amount - (schedule.interest + cFloat(schedule.interest_paid))
+        interest_paid = schedule.interest - cFloat(schedule.interest_paid)
+        paid.append(interest_paid)
+        if (schedule.interest - cFloat(schedule.interest_paid)) > 0:
+            amount = amount - (schedule.interest - cFloat(schedule.interest_paid))
     elif amount < (schedule.interest - cFloat(schedule.interest_paid)):
-        return [amount + cFloat(schedule.interest_paid), 0, 0, 0, p_status]
+        return [amount + cFloat(schedule.interest_paid), 0, 0, 0, p_status, amount, 0, 0]
 
     if amount >= (schedule.fee - cFloat(schedule.fee_paid)):
         final.append(schedule.fee)
-        amount = amount - (schedule.fee + cFloat(schedule.fee_paid))
+        fee_paid = schedule.fee - cFloat(schedule.fee_paid)
+        paid.append(fee_paid)
+        if (schedule.fee - cFloat(schedule.fee_paid)) > 0:
+            amount = amount - (schedule.fee - cFloat(schedule.fee_paid))
     else:
-        return [schedule.interest, amount + cFloat(schedule.fee_paid), 0, 0, p_status]
+        x = schedule.fee - cFloat(schedule.fee_paid)
+        return [schedule.interest, amount + cFloat(schedule.fee_paid), interest_paid, 0, p_status, interest_paid,
+                amount, 0]
 
     if amount >= (schedule.principal - cFloat(schedule.principal_paid)):
         final.append(schedule.principal)
-        amount = amount - (schedule.principal + cFloat(schedule.principal_paid))
+        paid.append(schedule.principal - cFloat(schedule.principal_paid))
+        amount = amount - (schedule.principal - cFloat(schedule.principal_paid))
         final.append(amount)
         final.append(f_status)
-        return final
+        return [*final, *paid]
     else:
-        return [schedule.interest, schedule.fee, amount + cFloat(schedule.principal_paid), 0, p_status]
-
-
-def fullyPayment(schedules: Model.Schedule):
-    with db_session:
-        try:
-            schedules.status = 'Fully Paid On Time'
-            schedules.principal_paid = schedules.principal
-            schedules.interest_paid = schedules.interest
-            schedules.fee_paid = schedules.fee
-            schedules.penalty_paid = schedules.penalty
-            schedules.collected_date = date.today()
-            if isTheFinalPaid(id, schedules.sch_no):
-                Model.Disbursement[id].status = "Closed"
-
-            Model.SchedulePaid(
-                sch_id=schedules.id,
-                invoice=invoice(),
-                paid_date=date.today(),
-                payment_date=schedules.collection_date,
-                interest_paid=schedules.interest_paid,
-                penalty_paid=schedules.penalty_paid,
-                fee_paid=schedules.fee_paid,
-                status='Close',
-            )
-            return True
-        except ValueError:
-            return False
+        return [schedule.interest, schedule.fee, amount + cFloat(schedule.principal_paid), 0, p_status, interest_paid,
+                fee_paid, amount]
 
 
 def updatePay(schedules: Model.Schedule, pay):
@@ -147,7 +132,8 @@ def updatePay(schedules: Model.Schedule, pay):
             schedules.fee_paid = pay[1]
             schedules.penalty_paid = 0
             schedules.collected_date = date.today()
-            if isTheFinalPaid(schedules.dis_id, schedules.sch_no) and pay[4] in ('Fully Paid On Time', 'Fully Paid But Late'):
+            if isTheFinalPaid(schedules.dis_id, schedules.sch_no) and pay[4] in (
+            'Fully Paid On Time', 'Fully Paid But Late'):
                 Model.Disbursement[schedules.dis_id].status = "Closed"
             Model.SchedulePaid(
                 dis_id=schedules.dis_id,
@@ -155,9 +141,10 @@ def updatePay(schedules: Model.Schedule, pay):
                 invoice=invoice(),
                 paid_date=date.today(),
                 payment_date=schedules.collection_date,
-                interest_paid=schedules.interest_paid,
-                penalty_paid=schedules.penalty_paid,
-                fee_paid=schedules.fee_paid,
+                interest_paid=pay[5],
+                penalty_paid=0,
+                fee_paid=pay[6],
+                principal_paid=pay[7],
                 status='Close',
             )
             return True

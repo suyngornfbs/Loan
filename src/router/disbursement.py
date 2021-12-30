@@ -1,6 +1,5 @@
-from fastapi import APIRouter, Request, status
+from fastapi import APIRouter, Request, status, Depends
 from pony.orm import db_session
-from fastapi import Depends
 from ..config.auth import get_current_user
 from ..models.schemasIn import UserIn, DisbursementIn
 from ..models.schemasOut import DisbursementOut
@@ -8,6 +7,7 @@ from ..models.model import Model
 from ..utils.disbursementUtil import *
 from ..utils.ScheduleUtil import generateSchedule
 from datetime import date
+from ..config.auth import get_current_user
 
 router = APIRouter()
 
@@ -18,7 +18,7 @@ def all(current_user: UserIn = Depends(get_current_user)):
         disbursement = Model.Disbursement.select()
         if not disbursement:
             return {
-                'success': 0,
+                'success': 1,
                 'message': 'Disbursement is empty!'
             }
         return {

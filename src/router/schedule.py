@@ -7,6 +7,7 @@ from pony.orm import db_session
 from datetime import date
 from ..utils.disbursementUtil import *
 from ..models.disbursementResource import PaymentOut, PayIn
+from ..config.auth import get_current_user
 from ..utils.ScheduleUtil import *
 
 router = APIRouter()
@@ -28,7 +29,7 @@ def scheduleByLoan(id: int, current_user: UserIn = Depends(get_current_user)):
 
 
 @router.get('/disbursement/{id}/form', tags=['Schedule'])
-def loan_form(id: int):
+def loan_form(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         disbursements_db = Model.Disbursement.get(lambda d: d.id == id)
         if not disbursements_db:
@@ -53,7 +54,7 @@ def loan_form(id: int):
 
 
 @router.post('/disbursement/{id}/schedule/paynow', tags=['Schedule'])
-def pay_now(id: int, request: PayIn):
+def pay_now(id: int, request: PayIn, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         validation = checkDisbursedAndSchedule(id)
         if validation != "ok":
@@ -83,7 +84,7 @@ def pay_now(id: int, request: PayIn):
 
 
 @router.post('/disbursement/{id}/schedule/payoff', tags=['Schedule'])
-def payoff(id: int):
+def payoff(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         validation = checkDisbursedAndSchedule(id)
         if validation != "ok":
@@ -105,13 +106,13 @@ def payoff(id: int):
             sch_id=schedules.id,
             invoice=invoice(),
             paid_date=date.today(),
+            principal_paid=schedules.principal,
             payment_date=schedules.collection_date,
             interest_paid=schedules.interest_paid,
             penalty_paid=schedules.penalty_paid,
             fee_paid=schedules.fee_paid,
             status='Close',
         )
-
         rm_sche = Model.Schedule.select(lambda s: s.sch_no > schedules.sch_no and s.dis_id == id)
         for rm in rm_sche:
             rm.delete()
@@ -123,15 +124,15 @@ def payoff(id: int):
 
 
 @router.post('/disbursement/{id}/schedule-paid', tags=['Schedule'])
-def schedule_paid(id: int):
+def schedule_paid(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
-        schedule_paid = Model.SchedulePaid.select(lambda s: s.dis_id == id)
-        if not schedule_paid:
+        schedule_paids = Model.SchedulePaid.select(lambda s: s.dis_id == id)
+        if not schedule_paids:
             return {
                 'success': 0,
                 'message': 'Disbursement or Schedule not found!'
             }
         return {
             'success': 1,
-            'data': [SchedulePaidOut(s) for s in schedule_paid]
+            'data': [SchedulePaidOut.from_orm(s) for s in schedule_paids]
         }
