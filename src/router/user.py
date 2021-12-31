@@ -1,14 +1,17 @@
-from fastapi import APIRouter, Depends, File, UploadFile
+from fastapi import APIRouter, Depends, File, UploadFile, Form
 from fastapi.responses import RedirectResponse, HTMLResponse
-from fastapi.staticfiles import StaticFiles
 from pony.orm import db_session, commit, flush
+from typing import Optional
 from ..models.model import Model
 from ..models.schemasIn import UserIn, RegisterIn
 from ..models.schemasOut import UserOut
 from ..utils.hashPassword import Hash
 from ..utils import helper
+from ..models.userInDB import UserInDB
 from datetime import date
 from ..config.auth import get_current_user, get_current_active_user
+import secrets
+from PIL import Image
 
 router = APIRouter()
 
@@ -79,7 +82,8 @@ def register(request: RegisterIn):
 
 
 @router.post('/user', tags=['User'])
-def create_user(request: UserIn, current_user: UserIn = Depends(get_current_active_user)):
+async def create_user(file: UploadFile = File(None), request: UserInDB = Depends(UserInDB.as_form),
+                      current_user: UserIn = Depends(get_current_active_user)):
     with db_session:
         if not request.email:
             return {
@@ -111,6 +115,28 @@ def create_user(request: UserIn, current_user: UserIn = Depends(get_current_acti
                 'success': 0,
                 'message': "email is already token"
             }
+        profile_image=''
+        if file:
+            FIlEPATH = 'storage/images/users/'
+            file_name = file.filename
+            extension = file_name.split(".")
+            if extension[1] not in ('jpg', 'png'):
+                return {
+                    'success': 0,
+                    'message': 'Upload file support only jpg and png'
+                }
+            token_name = secrets.token_hex(10) + '.' + extension[1]
+            profile_image = FIlEPATH + token_name
+            file_content = await file.read()
+            with open(profile_image, 'wb') as file:
+                file.write(file_content)
+
+            # Pillow
+            image = Image.open(profile_image)
+            image = image.resize(size=(200, 200))
+            image.save(profile_image)
+            file.close()
+
         try:
             user = Model.User(
                 name=request.name,
@@ -119,7 +145,7 @@ def create_user(request: UserIn, current_user: UserIn = Depends(get_current_acti
                 dob=request.dob if request.dob else None,
                 gender=request.gender if request.gender else '',
                 expires_in='',
-                profile_img='',
+                profile_img=profile_image,
                 about_me=request.about_me if request.about_me else '',
                 address=request.address if request.address else ""
             )
@@ -129,20 +155,6 @@ def create_user(request: UserIn, current_user: UserIn = Depends(get_current_acti
         'success': 1,
         'message': 'Register successfully'
     }
-
-
-# @router.post('/user/update/{id}', response_model=UserOut, tags=['User'])
-# def update_current_user(id: int, body: UserIn, current_user: UserOut = Depends(get_current_user)):
-#     with db_session:
-#         _id = current_user.id
-#
-#         Model.User[_id].name = body.name if body.name is not None else Model.User[_id].name
-#         # Model.User[_id].email = body.email
-#         if body.password is not None:
-#             password = Hash.get_password_hash(body.password)
-#             Model.User[_id].password = password
-#
-#         return current_user
 
 
 @router.put('/user/{id}', tags=['User'])

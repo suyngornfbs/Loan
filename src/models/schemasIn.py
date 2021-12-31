@@ -1,6 +1,6 @@
 import datetime
 from typing import Optional
-
+from fastapi import File, Form
 from pydantic import (BaseModel)
 
 
@@ -11,7 +11,6 @@ class UserIn(BaseModel):
     dob: Optional[datetime.date]
     gender: Optional[str]
     con_password: Optional[str]
-    profile_img: Optional[str]
     expires_in: Optional[str]
     address: Optional[str]
     about_me: Optional[str]
