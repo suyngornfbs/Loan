@@ -1,6 +1,6 @@
 import inspect
 from typing import Type
-import datetime
+from datetime import date
 from typing import Optional, List
 from fastapi import Form
 from pydantic import BaseModel
@@ -41,25 +41,12 @@ def as_form(cls: Type[BaseModel]):
     setattr(cls, 'as_form', as_form_func)
     return cls
 
-
-class User1(BaseModel):
-    name: Optional[str]
-    email: Optional[str]
-    password: Optional[str]
-    dob: Optional[datetime.date]
-    gender: Optional[str]
-    con_password: Optional[str]
-    expires_in: Optional[str]
-    address: Optional[str]
-    about_me: Optional[str]
-
-
 @as_form
 class UserInDB(BaseModel):
     name: Optional[str]
     email: Optional[str]
     password: Optional[str]
-    dob: Optional[datetime.date]
+    dob: Optional[date]
     gender: Optional[str]
     con_password: Optional[str]
     expires_in: Optional[str]
