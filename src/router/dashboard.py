@@ -35,7 +35,7 @@ def getDisbursement():
     with db_session:
         disbursement = Model.Disbursement.select(
             lambda d: getLastMonth() <= d.dis_date and d.dis_date <= getNextMonth())
-        return count(d for d in disbursement)
+        return sum(d.balance for d in disbursement)
 
 
 def getCollection():
