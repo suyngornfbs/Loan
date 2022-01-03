@@ -8,7 +8,6 @@ class UserOut(BaseModel):
     id: Optional[int]
     name: Optional[str]
     email: Optional[str]
-    password: Optional[str]
     gender: Optional[str]
     dob: Optional[datetime.date]
     expires_in: Optional[str]

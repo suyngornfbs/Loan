@@ -43,7 +43,7 @@ def get_user_by_id(id: int, current_user: UserIn = Depends(get_current_user)):
             return {'message': f'User id: {id} not found!'}
     return {
         'success': 1,
-        'data': UserIn.from_orm(user)
+        'data': UserOut.from_orm(user)
     }
 
 
