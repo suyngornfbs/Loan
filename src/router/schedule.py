@@ -38,7 +38,7 @@ def loan_form(id: int, current_user: UserIn = Depends(get_current_user)):
                 'message': 'Disbursement is not found!'
             }
         customers_db = Model.Customer.get(lambda c: c.id == disbursements_db.cus_id)
-        schedules_db = Model.Schedule.select(lambda s: s.dis_id == disbursements_db.id)
+        schedules_db = Model.Schedule.select(lambda s: s.dis_id == disbursements_db.id).order_by(lambda: s.id)
 
         data = {
             'disbursement': DisbursementOut.from_orm(disbursements_db),
