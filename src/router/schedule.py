@@ -43,7 +43,7 @@ def loan_form(id: int, current_user: UserIn = Depends(get_current_user)):
         data = {
             'disbursement': DisbursementOut.from_orm(disbursements_db),
             'customer': CustomerOut.from_orm(customers_db),
-            'schedules': [ScheduleOut.from_orm(s) for s in schedules_db],
+            'schedules': [getSchedule(s) for s in schedules_db],
             'total_sche': getTotalSche(disbursements_db.id),
             'pay_now': paynow(disbursements_db.id),
             'pay_off': payOff(disbursements_db.id)
@@ -135,5 +135,5 @@ def schedule_paid(id: int, current_user: UserIn = Depends(get_current_user)):
             }
         return {
             'success': 1,
-            'data': [SchedulePaidOut.from_orm(s) for s in schedule_paids]
+            'data': [getSchedulePaid(s) for s in schedule_paids]
         }

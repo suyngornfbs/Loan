@@ -105,7 +105,7 @@ def getTotalSche(dis_id):
         total_fee = fee - fee_paid
         total_penalty = 0
 
-        return{
+        return {
             'total_principal': total_principal,
             'total_interest': total_interest[0],
             'total_fee': total_fee,
@@ -184,7 +184,8 @@ def payOff(id: int):
         if date_count.days > 0:
             interest = disbursement.balance * disbursement.interest_rate * date_count.days / (
                     30 * 100) - cFloat(schedules.interest_paid)
-            fee = disbursement.balance * disbursement.fee_rate * date_count.days / (30 * 100) - cFloat(schedules.fee_paid)
+            fee = disbursement.balance * disbursement.fee_rate * date_count.days / (30 * 100) - cFloat(
+                schedules.fee_paid)
             principal = disbursement.balance - cFloat(schedules.principal_paid)
         else:
             interest = schedules.interest - cFloat(schedules.interest_paid)
@@ -252,3 +253,43 @@ def checkDisbursedAndSchedule(id: int):
                 'message': 'Schedule is not found!'
             }
         return 'ok'
+
+
+def getSchedule(s: Model.Schedule):
+    with db_session:
+        return {
+            'id': s.id,
+            'cus_id': s.cus_id,
+            'dis_id': s.dis_id,
+            'collection_date': s.collection_date,
+            'collected_date': s.collected_date,
+            'status': s.status,
+            'balance': s.balance if s.balance else 0,
+            'sch_no': s.sch_no,
+            'principal': s.principal if s.principal else 0,
+            'principal_paid': s.principal_paid if s.principal_paid else 0,
+            'interest': s.interest if s.interest else 0,
+            'interest_paid': s.interest_paid if s.interest_paid else 0,
+            'fee': s.fee if s.fee else 0,
+            'fee_paid': s.fee_paid if s.fee_paid else 0,
+            'penalty': s.penalty if s.penalty else 0,
+            'penalty_paid': s.penalty_paid if s.penalty_paid else 0
+        }
+
+
+def getSchedulePaid(s: Model.SchedulePaid):
+    with db_session:
+        return {
+            'id': s.id,
+            'dis_id': s.dis_id,
+            'sch_id': s.sch_id,
+            'invoice': s.invoice,
+            'paid_date': s.paid_date,
+            'payment_date': s.payment_date,
+            'interest_paid': s.interest_paid if s.interest_paid else 0,
+            'fee_paid': s.fee_paid if s.fee_paid else 0,
+            'principal_paid': s.principal_paid if s.principal_paid else 0,
+            'penalty_paid': s.penalty_paid if s.penalty_paid else 0,
+            'paid_total': s.paid_total if s.paid_total else 0,
+            'status': s.status
+        }
