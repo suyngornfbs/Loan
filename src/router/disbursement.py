@@ -8,6 +8,7 @@ from ..utils.disbursementUtil import *
 from ..utils.ScheduleUtil import generateSchedule
 from datetime import date
 from ..config.auth import get_current_user
+from ..resource import resource
 
 router = APIRouter()
 
@@ -23,7 +24,7 @@ def all(current_user: UserIn = Depends(get_current_user)):
             }
         return {
             'success': 1,
-            'data': [DisbursementOut.from_orm(d) for d in disbursement]
+            'data': [resource.disbursementResource(d) for d in disbursement]
         }
 
 
@@ -37,7 +38,7 @@ def get(id: int, current_user: UserIn = Depends(get_current_user)):
                 'message': f'Disbursement Id:{id} not found'}
         return {
             'success': 1,
-            'data': DisbursementOut.from_orm(disbursement)
+            'data': resource.disbursementResource(disbursement)
         }
 
 
@@ -72,7 +73,7 @@ def create(request: DisbursementIn, current_user: UserIn = Depends(get_current_u
             generateSchedule(DisbursementOut.from_orm(dis))
             return {
                 'success': 1,
-                'data': DisbursementOut.from_orm(disbursement)
+                'data': "Create disbursement successful"
             }
         except RuntimeError:
             return {
@@ -105,7 +106,7 @@ def update(id: int, request: DisbursementIn, current_user: UserIn = Depends(get_
 
         return {
             'success': 1,
-            'data': DisbursementOut.from_orm(disbursement)
+            'data': "Update disbursement successful"
         }
 
 
