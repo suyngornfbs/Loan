@@ -46,7 +46,7 @@ def getAllCustomerRate():
                              and c.created_at.year == getLastMonth().year)
         current_counted = count(c for c in customers if c.created_at.month == getCurrentMonth().month
                                 and c.created_at.year == getCurrentMonth().year)
-        return (current_counted - last_counted) * 100 / last_counted
+        return (current_counted - last_counted) * 100 / (last_counted if last_counted != 0 else 1)
 
 
 def getDisbursement():
@@ -64,7 +64,7 @@ def getDisbursementRate():
                                 and d.dis_date.year == getLastMonth().year)
         current_disbursement = sum(d.balance for d in disbursement if d.dis_date.month == getCurrentMonth().month
                                    and d.dis_date.year == getCurrentMonth().year)
-        return (current_disbursement - last_disbursement) * 100 / last_disbursement
+        return (current_disbursement - last_disbursement) * 100 / (last_disbursement if last_disbursement != 0 else 1)
 
 
 def getCollection():
@@ -95,7 +95,7 @@ def getCollectionRate():
         fee = sum(s.fee for s in current_schedule if s.fee)
         current_collection = principal + interest + fee
 
-        return round((current_collection - last_collection) * 100 / last_collection, 2)
+        return round((current_collection - last_collection) * 100 / (last_collection if last_collection != 0 else 1), 2)
 
 
 def getCollected():
@@ -127,7 +127,7 @@ def getCollectedRate():
         fee = sum(s.fee_paid for s in current_schedule_paid if s.fee_paid)
         current_collected = principal + interest + fee
 
-        return round((current_collected - last_collected) * 100 / last_collected, 2)
+        return round((current_collected - last_collected) * 100 / (last_collected if last_collected != 0 else 1), 2)
 
 
 def getChartCollection():
