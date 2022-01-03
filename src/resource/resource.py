@@ -19,5 +19,8 @@ def disbursementResource(disbursement: Model.Disbursement):
             'dis_date': disbursement.dis_date,
             'first_date': disbursement.first_date,
             'duration': disbursement.duration,
-            'frequency': disbursement.frequency
+            'frequency': disbursement.frequency,
+            'duration_period': disbursement.duration_period,
+            'interest_period': disbursement.interest_period,
+            'currency': disbursement.currency
         }
