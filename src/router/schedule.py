@@ -112,7 +112,7 @@ def payoff(id: int, current_user: UserIn = Depends(get_current_user)):
             interest_paid=schedules.interest_paid,
             penalty_paid=schedules.penalty_paid,
             fee_paid=schedules.fee_paid,
-            status='Close',
+            status='Paid Off',
         )
         rm_sche = Model.Schedule.select(lambda s: s.sch_no > schedules.sch_no and s.dis_id == id)
         for rm in rm_sche:
