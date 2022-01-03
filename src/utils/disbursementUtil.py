@@ -83,7 +83,7 @@ def paynow(disbursement_id: int):
             'interest': allPay[1],
             'fee': allPay[2],
             'penalty': 0,
-            'total': allPay[3],
+            'amount': allPay[3],
             'date': date.today()
         }
 
@@ -197,7 +197,7 @@ def payOff(id: int):
             'interest': interest if interest > 0 else 0,
             'fee': fee if fee > 0 else 0,
             'penalty': 0,
-            'total': total if total > 0 else 0,
+            'amount': total if total > 0 else 0,
             'date': date.today()
         }
 
