@@ -90,6 +90,29 @@ def paynow(disbursement_id: int):
         return schedule_dict
 
 
+def getTotalSche(dis_id):
+    with db_session:
+        schedules = Model.Schedule.select(lambda s: s.dis_id == dis_id)
+        principal = sum(s.principal for s in schedules if s.principal)
+        principal_paid = sum(s.principal_paid for s in schedules if s.principal_paid)
+        interest = sum(s.interest for s in schedules if s.interest)
+        interest_paid = sum(s.interest_paid for s in schedules if s.interest_paid)
+        fee = sum(s.fee for s in schedules if s.fee)
+        fee_paid = sum(s.fee_paid for s in schedules if s.fee_paid)
+
+        total_principal = principal - principal_paid
+        total_interest = interest - interest_paid,
+        total_fee = fee - fee_paid
+        total_penalty = 0
+
+        return{
+            'total_principal': total_principal,
+            'total_interest': total_interest[0],
+            'total_fee': total_fee,
+            'total_penalty': total_penalty
+        }
+
+
 def getAllTotalPay(schedules):
     if schedules.first().status in ('Due Today', 'Not Yet Due', 'Partial Paid'):
         schedule = schedules.first()
@@ -160,9 +183,9 @@ def payOff(id: int):
         date_count = date.today() - collection_date
         if date_count.days > 0:
             interest = disbursement.balance * disbursement.interest_rate * date_count.days / (
-                    30 * 100) - schedules.interest_paid
-            fee = disbursement.balance * disbursement.fee_rate * date_count.days / (30 * 100) - schedules.fee_paid
-            principal = disbursement.balance - schedules.principal_paid
+                    30 * 100) - cFloat(schedules.interest_paid)
+            fee = disbursement.balance * disbursement.fee_rate * date_count.days / (30 * 100) - cFloat(schedules.fee_paid)
+            principal = disbursement.balance - cFloat(schedules.principal_paid)
         else:
             interest = schedules.interest - cFloat(schedules.interest_paid)
             fee = schedules.fee - cFloat(schedules.fee_paid)

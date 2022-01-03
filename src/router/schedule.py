@@ -44,6 +44,7 @@ def loan_form(id: int, current_user: UserIn = Depends(get_current_user)):
             'disbursement': DisbursementOut.from_orm(disbursements_db),
             'customer': CustomerOut.from_orm(customers_db),
             'schedules': [ScheduleOut.from_orm(s) for s in schedules_db],
+            'total_sche': getTotalSche(disbursements_db.id),
             'pay_now': paynow(disbursements_db.id),
             'pay_off': payOff(disbursements_db.id)
         }
@@ -123,7 +124,7 @@ def payoff(id: int, current_user: UserIn = Depends(get_current_user)):
         }
 
 
-@router.post('/disbursement/{id}/schedule-paid', tags=['Schedule'])
+@router.get('/disbursement/{id}/schedule-paid', tags=['Schedule'])
 def schedule_paid(id: int, current_user: UserIn = Depends(get_current_user)):
     with db_session:
         schedule_paids = Model.SchedulePaid.select(lambda s: s.dis_id == id)
